@@ -111,11 +111,13 @@ async def on_message(message):
         coin, amount = message.content.split()[1:3]
         everything = False
         auth = message.author.id
-        if not os.path.exists(f"users/{userid}.json"):
-            with open(f"users/{userid}.json", "w") as f:
+        #opens/creates the user json file
+        if not os.path.exists(f"users/{auth}.json"):
+            with open(f"users/{auth}.json", "w") as f:
                 json.dump({}, f)
         with open(f"users/{auth}.json", "r") as f:
           data = json.load(f)
+        #if all is selected it will set amount to the USD account bal
         if amount == "all":
             everything = True
             amount = data["USD"]
@@ -124,9 +126,10 @@ async def on_message(message):
             amount = int(amount)
         uprice = get_usd_crypto_price(coin)
         # btc_price = get_usd_crypto_price("btc")
-        btc = float(amount)/float(uprice)
+        cprice = float(amount)/float(uprice)
         # with open(f"users/{auth}.json", "r") as f:
         #   data = json.load(f)
+        #creates line in the json file if they are not already there
         if data.get(coin) is None:
           data[coin] = 0.0
         if data.get("USD") is None:
@@ -135,14 +138,15 @@ async def on_message(message):
             await message.channel.send("Warning: Could not complete trade, coin balance too low.  Your current USD balance is {}".format(data.get("USD")))
             return
         if everything:
-            data[coin] += data["USD"]
+            #using cprice ensures the proper amount of coins is added to the wallet, not the USD price just added to coin bal
+            data[coin] += cprice
             all = data["USD"]
             data["USD"] = 0
-            await message.channel.send("Successfully traded ${} for {}btc".format(all, btc))
+            await message.channel.send("Successfully traded ${} for {}{}".format(all, cprice, coin))
         else:
-            data[coin] += amount
+            data[coin] += cprice
             data["USD"] -= amount
-            await message.channel.send("Successfully traded ${} for {}btc".format(amount, btc))
+            await message.channel.send("Successfully traded ${} for {}{}".format(amount, cprice, coin))
         with open(f"users/{auth}.json", "w") as f:
           json.dump(data, f)
 
@@ -150,20 +154,19 @@ async def on_message(message):
         coin, amount = message.content.split()[1:3]
         everything = False
         auth = message.author.id
-        if not os.path.exists(f"users/{userid}.json"):
-            with open(f"users/{userid}.json", "w") as f:
+        if not os.path.exists(f"users/{auth}.json"):
+            with open(f"users/{auth}.json", "w") as f:
                 json.dump({}, f)
         with open(f"users/{auth}.json", "r") as f:
           data = json.load(f)
-        #checks if all money is selected, and if so, sets amount to current usd balance
         if amount == "all":
             everything = True
             amount = data[coin]
         else:
             amount = int(amount)
         uprice = get_usd_crypto_price(coin)
-        btc_price = get_usd_crypto_price("btc")
-        btc = float(amount)/float(btc_price)
+        # btc_price = get_usd_crypto_price("btc")
+        cprice = float(amount)*float(uprice)
         auth = message.author.id
         # with open(f"users/{auth}.json", "r") as f:
         #   data = json.load(f)
@@ -175,28 +178,30 @@ async def on_message(message):
           await message.channel.send("Warning: Could not complete trade, coin balance too low.  Your current {} balance is {}".format(coin, data.get(coin)))
           return
         if everything:
-            data["USD"] += data[coin]
+            data["USD"] += cprice
             all = data[coin]
             data[coin] = 0
-            await message.channel.send("Successfully traded ${} for {}btc".format(all, btc))
+            await message.channel.send("Successfully traded ${} for {}{}".format(cprice, all, coin))
         else:
-            data[coin] -= amount
+            data[coin] -= cprice
             data["USD"] += amount
-            await message.channel.send("Successfully traded ${} for {}btc".format(amount, btc))
+            await message.channel.send("Successfully traded ${} for {}btc".format(cprice, amount, coin))
         with open(f"users/{auth}.json", "w") as f:
           json.dump(data, f)
 
-#crypto wallet
     if message.content.startswith('!wallet'):
         auth = message.author.id
+        if not os.path.exists(f"users/{auth}.json"):
+            with open(f"users/{auth}.json", "w") as f:
+                json.dump({}, f)
         with open(f"users/{auth}.json", "r") as f:
           data = json.load(f)
         total = 0
-        embed=discord.Embed(title="{} wallet".format(message.author.nick), color=discord.Color.blue())
+        embed=discord.Embed(title="{}'s wallet".format(message.author.nick), color=discord.Color.blue())
         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
         for coin, value in data.items():
           embed.add_field(name=coin, value=value)
-          print(get_usd_crypto_price(coin))
+          # print(get_usd_crypto_price(coin))
           total += float(get_usd_crypto_price(coin)) * value
         embed.add_field(name="Total", value=f"Total: ${total}")
         await message.channel.send(embed=embed)
