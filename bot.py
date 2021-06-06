@@ -11,12 +11,56 @@ from discord.ext.commands import has_permissions
 from bs4 import BeautifulSoup
 import cryptocompare
 import json
+from discord.utils import find
+import numpy
+
+intents = discord.Intents.default()
+intents.members = True
+
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = discord.Client()
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_member_join(member):
+    # print("Joined!")
+    channel = client.get_channel(829349688197120052)
+    invite_list = await member.guild.invites()
+    # print(invite_list)
+    # for i in invite_list:
+    #     print(i.inviter)
+    # general = find(lambda x: x.name == 'general',  guild.text_channels)
+    # print(general)
+    # await channel.send('Hello {} and welcome to the server!  A lot of people seem to join and then just never say anything so please don\'t do that thanks.  Anyway be sure to answer the questions in <#830565670805962822> and then check out <#830565732001644555> and <#830565778654887958> for more information!  Also when enabled I will delete every message containing sus, vented, etc.  So if your messages are getting removed, that might be why'.format(member.name))
+    secret = client.get_channel(850459809324597288)
+    # print(invite_list[2].uses)
+    for i in range(0, len(invite_list)):
+        # for x in invite_list:
+        num_list = []
+        # invite =
+        # with is like your try .. finally block in this case
+        with open('invites.txt', 'r') as file:
+        # read a list of lines into data
+            data = file.readlines()
+        if invite_list[i].uses is not data[i]:
+            await secret.send("{} was invited to the server by {}".format(member.name, invite_list[i].inviter))
+            data[i] = invite_list[i].uses
+            break
+            # print(data)
+        # with open('invites.txt', 'w') as file:
+        #     file.write('\n'.join(data))
+
+    invites_list = await member.guild.invites()
+    list = []
+    for i in range (0, len(invites_list)):
+        # print(invites_list[i].uses)
+        list.append(invites_list[i].uses)
+    with open('invites.txt', 'w') as file:
+        file.write('\n'.join([str(x) for x in list]))
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -34,25 +78,27 @@ async def on_message(message):
                 response = message.content.replace('!send', '')
                 return await channel.send(response)
 
-    # print(message.content)
-    #
-    # if message.content.startswith("?") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
-    #     print("kicking")
-    #     cont = message.content.split(' ')
-    #     auth = int(cont[1].strip('@,<>,!'))
-    #     memb = await message.guild.fetch_member(auth)
-    #     if message.author.id == auth:
-    #         return await message.channel.send("You can't kick yourself I'm afraid!")
-    #     await memb.kick(reason="You were inactive and have been footed")
-    #     return await message.channel.send("Goodbye goofball <:pixellice:829423250361679922>")
-
     if message.guild is not None and message.guild.id == 829349685667430460:
+
+        wheel_speak = ["Fucking windows man.  Literal spyware.  Stop using that shit and switch to Linux.  Imagine having to download stuff from the internet.  Cringe as fuck","Capitalism is not a sustainable system.  It is one that grants immense power to those born rich, and does nothing but harm everyone else.  Literally fucking killing the planet and can't do shit about it as all the politicians are paid off. man.","Dude chrome is literally logging every single thing you type and selling that shit to advertisers.  Please switch to hardened firefox or brave.  There is literally no need for companies to know so much about you.  Privacy is genuinely important.","Ok but honestly colemak is so much nicer than qwerty.  Everything is done in the name of maximum comfort and typing efficiency.  I don't know why you'd use a keyboard layout that's literally worse in every way.","Imagine not having nearly 4TB of storage space.  Cringe.  And cookie for the love of god will you implement some sort of naming convention please <:sadtownload:829423251214041148>","oyunarsoyun","Vim is so much better than other IDEs honestly.  And god.  Fucking nano.  Man why would you do that when vim is genuinely so much better"]
+
+        wheel = ["Man let me tell you about Linux...","Fucking Chrome man, please switch...","Data collection is kinda cool ig","Stop using other IDEs when vim is just better...","Ok colemak is genuinely better because...","Oh boy you're boutta be converted to socialism.  Our numbers must grow...","oyaunrsoyun"]
+
+        if message.content.lower() == "!jomwheel spin -s":
+            num = random.randint(0,6)
+            await message.channel.send("*clickclickclickclick*")
+            return await message.channel.send(wheel_speak[num])
+
+        if message.content.lower() == "!jomwheel spin":
+            num = random.randint(0,6)
+            await message.channel.send("*clickclickclickclick*")
+            return await message.channel.send(wheel[num])
 
         # print(message.content)
         # print(len(message.content.split(' ')))
         # print(message.author.guild_permissions)
         # print(message.author.guild_permissions.kick_members)
-        if message.content.startswith("?") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
+        if message.content.startswith("🦶") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
             print("kicking")
             cont = message.content.split(' ')
             auth = int(cont[1].strip('@,<>,!'))
@@ -65,11 +111,24 @@ async def on_message(message):
         if message.content == "!reply":
             return await message.reply('Hello')
 
+        if message.content.startswith("!print"):
+            return print(message.content)
+
         if message.content == "!short":
             return await message.channel.send("Ha lark is short")
 
         if message.content == "!introduce":
-            return await message.channel.send("Hey there and welcome to the server!  Just a few quick questions to start off: \n 1. Are you british?  And if not what country are you from? \n 2. Do you use Linux? \n 3. Are you religious? \n 4. How old are you? \n 5. What are your preferred pronouns?\n 6. If you are political, what is your political ideology? \n Our answers start here: https://discord.com/channels/829349685667430460/829349688197120052/829674411337973770 \n Also when enabled I will delete every message containing sus, vented, etc.  So if your messages are getting removed, that might be why")
+            return await message.channel.send("Hey there and welcome to the server!  Be sure to answer the questions in <#830565670805962822> and then check out <#830565732001644555> and <#830565778654887958> for more information!  Also when enabled I will delete every message containing sus, vented, etc.  So if your messages are getting removed, that might be why")
+
+        if message.author.id == 85400548534145024 and message.content == "!enable ban":
+            response = "!disable ban"
+            await message.channel.send(response)
+            return
+        # print("yee")
+        if message.mention_everyone:
+            # print("Introducing!")
+            return await message.channel.send("This seems important <:flosh:701774266894647338>")
+
 
         if message.author.id == 85400548534145024 and message.content == "!enable ban":
             response = "!disable ban"
@@ -115,14 +174,6 @@ async def on_message(message):
             await message.channel.send(response)
             return
 
-    # print("haw")
-    # server = message.guild.id
-    # if not os.path.exists(f"servers/{server}.json"):
-    #     with open(f"servers/{server}.json", "w") as f:
-    #         json.dump({}, f)
-    # with open(f"servers/{server}.json", "r") as f:
-    #     global server_data
-    #     server_data = json.load(f)
 
     comment = message.content.lower()
     com = comment.strip().replace("*", "")
@@ -132,7 +183,45 @@ async def on_message(message):
     sushi = "sushi"
     # print("1")
     # print(message.content)
+    if message.content == "inv_txt":
+        invites_list = await message.guild.invites()
+        list = []
+        for i in range (0, len(invites_list)):
+            # print(invites_list[i].uses)
+            list.append(invites_list[i].uses)
+        # Array =  numpy.array(list)
+        # file = open("test.txt", "w+")
+        # content = str(Array)
+        # file.write(content)
+        # file.close()
+        # return print("File closed")
+        with open('test.txt', 'w') as file:
+            file.write('\n'.join([str(x) for x in list]))
 
+
+    if message.content == "ls invites":
+        invite_list = await message.guild.invites()
+        for i in range (0, len(invite_list)):
+            print(invite_list[i].uses)
+        # secret = client.get_channel(850459809324597288)
+        # # print(invite_list[2].uses)
+        # for i in invite_list:
+        #     num_list = []
+        #     # with is like your try .. finally block in this case
+        #     with open('invite.txt', 'r') as file:
+        #     # read a list of lines into data
+        #         data = file.readlines()
+        #     if invite_list[i].uses is not data[1]:
+        #         await secret.send("{} was invited to the server by {}".format(guild.name, i.inviter.user))
+        #         data[1] = invite_list[i]
+        #         with open('stats.txt', 'w') as file:
+        #             file.writelines( data )
+
+
+
+        # for i in invite_list:
+        #     print(i.inviter)
+        # await message.channel.send(invite_list)
 
     # print("74")
     if message.content.startswith("!1984") and message.author.guild_permissions.manage_guild:
@@ -177,24 +266,27 @@ async def on_message(message):
     # print("87")
     for word in banned_words:
         server = message.guild.id
+        channel  = str(message.channel.id)
         if not os.path.exists(f"servers/{server}.json"):
             with open(f"servers/{server}.json", "w") as f:
                 json.dump({}, f)
         with open(f"servers/{server}.json", "r") as f:
             server_data = json.load(f)
-        if server_data.get("SBanned") is None:
-            pass
-        if server_data.get(message.channel.id) is not None and server_data[message.channel.id] == False:
+        # print(server_data[channel])
+        if server_data.get(channel) is not None and server_data[channel] == False:
             break
-        elif server_data["SBanned"] and word in com:
-            if message.author.id != 484444017489084416 and jesus not in com or sushi not in com:
-                # break
+        if server_data["SBanned"] and word in com:
+            # if message.author.id != 484444017489084416 or jesus not in com or sushi not in com:
+            if message.author.id == 484444017489084416:
+                break
             #
-            # elif jesus in com or sushi in com:
-            #     break
+            elif jesus in com or sushi in com:
+                break
             #
-            # await message.delete()
-                return json.dump(server_data, f)
+            await message.delete()
+            # with open(f"servers/{server}.json", 'w') as f:
+            #
+            #     return json.dump(server_data, f)
     # if message.content == "!offline" and message.author.id == 484444017489084416:
     #     await client.change_presence(status=discord.status.offline)
     # if message.content == "!online" and message.author.id == 484444017489084416:
@@ -422,28 +514,6 @@ async def on_message(message):
 # async def on_reaction_add(reaction, user):
 #     # print(reaction.emoji.encode())
 #     # print("{} does have the perms manage_messages".format(user))
-#     async for user in reaction.users():
-#
-#         # channel = client.get_channel(823243464212873226)
-#         if user != None and user != client.user and user.guild_permissions.manage_messages:
-#             # print(user)
-#             # if user.permissions_for(manage_messages) == True and reaction.emoji == "?":
-#             if reaction.emoji == "\N{CLAPPING HANDS SIGN}":
-#                 # response = "{} deleted the message \"{}\" by {}".format(user, reaction.message.content, reaction.message.author)
-#                 # audit = "audit-zone"
-#                 # await channel.send(response)
-#                 await reaction.message.delete()
-#                 return
-#
-# # @has_permissions(manage_messages=False)
-# # async def on_reaction_add(reaction, user):
-#     # print("{} does not have the perms manage_messages".format(user))
-#     # channel = reaction.channel
-#     # print(reaction.emoji)
-#         elif len(reaction.message.embeds) > 0:
-#             embed = reaction.message.embeds[0]
-#             if reaction.message.author == client.user and reaction.emoji == "?":
-#                 await reaction.message.delete()
-#                 return
 
 client.run(TOKEN)
+#Client.load_extension("invites")
