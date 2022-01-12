@@ -33,7 +33,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
 
         self.data = data
-
         self.title = data.get("title")
         self.url = data.get("url")
 
@@ -59,6 +58,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class Song(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.audio_player_task.start(bot)
+#         self.audio_player_task.start()
         print("Song initialised")
 #         self.bot.playlists = {}
 
@@ -66,6 +67,7 @@ class Song(commands.Cog):
         self.audio_player_task.cancel()
 
     @tasks.loop(seconds=1.0)
+#     async def audio_player_task(self, ctx):
     async def audio_player_task(self, ctx):
         print("hi")
         if not ctx.voice_client.is_playing() and not paused and len(playlist) > 0:
