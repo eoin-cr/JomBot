@@ -2,7 +2,6 @@ import asyncio
 import typing
 import discord
 import youtube_dl
-
 from discord.ext import commands
 
 # Suppress noise about console usage from errors
@@ -25,6 +24,9 @@ ytdl_format_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+playlist = []
+paused = False
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -36,7 +38,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get("url")
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False, timestamp=0):
+    async def from_url(cls, url, *, loop=None, stream=True, timestamp=0):
         # moved the options from outside the class to inside the method.
         # this allows the use of variables in the options
         ffmpeg_options = {"options": f"-vn -ss {timestamp}"}
@@ -60,17 +62,31 @@ class Song(commands.Cog):
         print("Song initialised")
         self.bot.playlists = {}
 
-#     @commands.Cog.listener
-#     async def on_ready():
-#         print('client ready')
-#
-#     async def audio_player_task():
+    @commands.command
+    async def on_ready():
+        print('client ready')
+
+    async def audio_player_task(self, ctx):
+        while not ctx.voice_client.is_playing() and not paused and self.bot.playlists.get(serverid) is not None:
+#         while not ctx.voice_client.is_playing() and not paused and len(playlist) > 1:
+            async with ctx.typing():
+                serverid = ctx.guild
+                player = await YTDLSource.from_url(
+                    self.bot.playlists[serverid][0], loop=self.bot.loop, stream=True, timestamp=0
+                )
+                ctx.voice_client.play(
+                    player, after=lambda e: print("Player error: %s" % e) if e else None
+                )
+
+            await ctx.send("Now playing: {}".format(player.title))
+#                 playlist.pop(0)
+#                 playlist.pop(0)
+
 #         while True:
 #             play_next_song.clear()
 #             current = await songs.get()
 #             current.start()
 #             await play_next_song.wait()
-#
 #
 #     def toggle_next():
 #         client.loop.call_soon_threadsafe(play_next_song.set)
@@ -98,12 +114,13 @@ class Song(commands.Cog):
     @commands.command(name="play", aliases=["p"], help="Use [timestamp in seconds] song name to start playing from a certain part of a song")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
         voice_channel = ctx.author.voice.channel
-        if ctx.voice_client is None or ctx.voice_channel != voice_channel:
-            if ctx.voice_client is None:
-                vc = await voice_channel.connect()
-            else:
-                await ctx.voice_client.move_to(voice_channel)
-                vc = ctx.voice_client
+
+        if ctx.voice_client is None:
+            vc = await voice_channel.connect()
+#         elif not ctx.voice_channel.is_playing() and ctx.voice.channel != ctx.author.voice.channel:
+        elif ctx.voice.channel != ctx.author.voice.channel:
+            await ctx.voice_client.move_to(voice_channel)
+            vc = ctx.voice_client
 
         async with ctx.typing():
             player = await YTDLSource.from_url(
@@ -126,6 +143,7 @@ class Song(commands.Cog):
                 self.bot.playlists[serverid].append(url)
                 print(self.bot.playlists[serverid])
 
+#             if len(playlist) == 0:
             async with ctx.typing():
                 player = await YTDLSource.from_url(
                     url, loop=self.bot.loop, stream=True, timestamp=timestamp
@@ -134,18 +152,21 @@ class Song(commands.Cog):
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
             await ctx.send("Now playing: {}".format(player.title))
+#             else:
+#                 playlist.append(timestamp)
+#                 playlist.append(url)
 
     @commands.command(name="piss", aliases=["pissing"])
     async def piss(self, ctx):
         serverid = ctx.guild
 
         voice_channel = ctx.author.voice.channel
-        if ctx.voice_client is None or ctx.voice_channel != voice_channel:
-            if ctx.voice_client is None:
-                vc = await voice_channel.connect()
-            else:
-                await ctx.voice_client.move_to(voice_channel)
-                vc = ctx.voice_client
+        if ctx.voice_client is None:
+            vc = await voice_channel.connect()
+#         elif not ctx.voice_channel.is_playing() and ctx.voice.channel != ctx.author.voice.channel:
+        elif ctx.voice.channel != ctx.author.voice.channel:
+            await ctx.voice_client.move_to(voice_channel)
+            vc = ctx.voice_client
 
         if self.bot.playlists.get(serverid) is None:
             self.bot.playlists[serverid] = list()
@@ -154,17 +175,23 @@ class Song(commands.Cog):
             self.bot.playlists[serverid].append("Momentary bliss")
             print(self.bot.playlists[serverid])
 
+#         if len(playlist) == 0:
         async with ctx.typing():
             player = await YTDLSource.from_url("Momentary bliss", loop=self.bot.loop, stream=True)
             ctx.voice_client.play(
                 player, after=lambda e: print("Player error: %s" % e) if e else None
             )
         await ctx.send("Now playing: {}".format(player.title))
+#         else:
+#             playlist.append(0)
+#             playlist.append("Momentary bliss")
 
     @commands.command(name="pause", help="Pauses the song")
     async def pause(self, ctx):
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
+            paused = True
+            await ctx.message.channel.send("Paused!")
         else:
             await ctx.message.channel.send("The bot is not playing any music")
 
@@ -172,8 +199,41 @@ class Song(commands.Cog):
     async def resume(self, ctx):
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
+            paused = False
+            await ctx.message.channel.send("Resumed!")
         else:
             await ctx.message.channel.send("No music has been paused")
+
+#     @commands.command(name="remove", aliases=["r"], help="Remove an item from the queue")
+#     async def remove(self, ctx, num):
+#         if len(playlist) / 2 < num:
+#             await ctx.message.channel.send("No queue item of that number, please try again")
+#         else:
+#             playlist.pop(num * 2)
+#             playlist.pop(num * 2 - 1)
+
+    @commands.command(name="queue", aliases=["q"], help="Displays the queue")
+    async def queue(self, ctx):
+        serverid = ctx.guild
+        if self.bot.playlists.get(serverid) is None:
+            await ctx.message.channel.send("The queue is empty!")
+        else:
+            await ctx.message.channel.send(self.bot.playlists.get(serverid))
+#             response = ""
+#             i = 1
+#             for x in playlist:
+#                 if x % 2 == 1:
+#                     break
+#                 response += "{} \t {} \n".format(i, playlist[x])
+#             await ctx.message.channel.send(response)
+
+    @commands.command(name="skip", help="Skips the current song")
+    async def skip(self, ctx):
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+            await ctx.message.channel.send("Skipped!")
+        else:
+            await ctx.message.channel.send("The bot is not playing any music")
 
 
 def setup(bot):
