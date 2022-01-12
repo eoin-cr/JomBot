@@ -1,5 +1,5 @@
-import asyncio
 import typing
+import asyncio
 import discord
 import youtube_dl
 from discord.ext import tasks, commands
@@ -24,7 +24,9 @@ ytdl_format_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+
 playlist = []
+pretty_playlist = []
 global paused
 paused = False
 global current
@@ -71,6 +73,7 @@ class Song(commands.Cog):
     @tasks.loop(seconds=1.0)
 #     async def audio_player_task(self, ctx):
     async def audio_player_task(self, guild, ctx):
+
         if not ctx.voice_client.is_playing() and not paused and len(playlist) > 0:
             async with ctx.typing():
                 player = await YTDLSource.from_url(
@@ -84,6 +87,7 @@ class Song(commands.Cog):
             global current
             current = playlist[0]
             playlist.pop(0)
+            pretty_playlist.pop(0)
 
     @commands.command(name="join", aliases=["j"], help="Joins a voice channel")
     async def join(self, ctx):
@@ -111,6 +115,7 @@ class Song(commands.Cog):
 
     @commands.command(name="play", aliases=["p"], help="Adds a song to the queue")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
+
         voice_channel = ctx.author.voice.channel
 
         if ctx.voice_client is None:
@@ -127,7 +132,8 @@ class Song(commands.Cog):
             player = await YTDLSource.from_url(
                 url
             )
-            playlist.append(player.title)
+            playlist.append(url)
+            pretty_playlist.append(player.title)
             await ctx.send("{} has been added to the queue".format(player.title))
 
         else:
@@ -146,6 +152,7 @@ class Song(commands.Cog):
     @commands.command(name="piss", aliases=["pissing"])
     async def piss(self, ctx):
 
+
         voice_channel = ctx.author.voice.channel
         if ctx.voice_client is None:
             vc = await voice_channel.connect()
@@ -157,12 +164,15 @@ class Song(commands.Cog):
         if not self.audio_player_task.is_running():
             self.audio_player_task.start(ctx.guild, ctx)
 
+        player = await YTDLSource.from_url(
+            "Momentary bliss", loop=self.bot.loop, timestamp=0
+        )
         if len(playlist) > 0 or ctx.voice_client.is_playing():
             playlist.append("Momentary bliss")
+            pretty_playlist.append(player.title)
             await ctx.send("Momentary bliss has been added to the queue")
         else:
             async with ctx.typing():
-                player = await YTDLSource.from_url("Momentary bliss", loop=self.bot.loop, stream=True)
                 ctx.voice_client.play(
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
@@ -190,16 +200,22 @@ class Song(commands.Cog):
         else:
             await ctx.message.channel.send("No music has been paused")
 
-#     @commands.command(name="remove", aliases=["r"], help="Remove an item from the queue")
-#     async def remove(self, ctx, num):
-#         if len(playlist) / 2 < num:
-#             await ctx.message.channel.send("No queue item of that number, please try again")
-#         else:
-#             playlist.pop(num * 2)
-#             playlist.pop(num * 2 - 1)
-
     @commands.command(name="queue", aliases=["q"], help="Displays the queue")
     async def queue(self, ctx):
+        if len(pretty_playlist) == 0:
+            await ctx.message.channel.send("The queue is empty")
+        else:
+            response = ""
+            i = 1
+            for i, x in enumerate(pretty_playlist):
+                response += f"{i+1:<5}{x}" + "\n"
+#             for x in playlist:
+#                 response += "{} \t {} \n".format(i, x)
+#                 i += 1
+            await ctx.message.channel.send(response)
+
+    @commands.command(name="raw_queue", help="Displays the raw queue for debugging")
+    async def raw_queue(self, ctx):
         if len(playlist) == 0:
             await ctx.message.channel.send("The queue is empty")
         else:
@@ -222,7 +238,6 @@ class Song(commands.Cog):
 
     @commands.command(name="seek", help="Seeks (in seconds) to a certain part of the song")
     async def seek(self, ctx, timestamp):
-        print(current)
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
             global paused
@@ -249,6 +264,28 @@ class Song(commands.Cog):
             await ctx.send("Currently playing: {}".format(player.title))
         else:
             await ctx.send("No music is currently playing.")
+
+    @commands.command(name="remove", aliases=["r", "rm", "del", "delete"], help="Removes an item from the queue")
+    async def remove(self, ctx, num):
+
+        if int(num) > len(playlist):
+            await ctx.send("No item in queue with this value")
+        else:
+            await ctx.send("Removed {} from the queue".format(pretty_playlist[int(num) - 1]))
+            playlist.pop(int(num) - 1)
+            pretty_playlist.pop(int(num) - 1)
+
+    @commands.command(name="move", aliases=["m", "mv"], help="Moves an item in the queue")
+    async def move(self, ctx, old, new):
+
+        if int(old) > len(playlist):
+            await ctx.send("No item in queue with this value")
+        elif int(new) > len(playlist):
+            await ctx.send("Please enter a number within the bounds of the queue")
+        else:
+            playlist.insert(int(new) - 1, playlist.pop(int(old) - 1))
+            pretty_playlist.insert(int(new) - 1, pretty_playlist.pop(int(old) - 1))
+            await ctx.send("Moved {} to number {} in the queue".format(pretty_playlist[int(new) - 1], new))
 
 
 def setup(bot):
