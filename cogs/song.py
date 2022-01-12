@@ -1,5 +1,5 @@
 import asyncio
-
+import typing
 import discord
 import youtube_dl
 
@@ -23,8 +23,6 @@ ytdl_format_options = {
     "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
-ffmpeg_options = {"options": "-vn"}
-
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
@@ -38,7 +36,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get("url")
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
+    async def from_url(cls, url, *, loop=None, stream=False, timestamp=0):
+        # moved the options from outside the class to inside the method.
+        # this allows the use of variables in the options
+        ffmpeg_options = {"options": f"-vn -ss {timestamp}"}
+        # rest of the from_url code
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(
             None, lambda: ytdl.extract_info(url, download=not stream)
@@ -78,6 +80,39 @@ class Song(commands.Cog):
     async def leave(self, ctx):
         await ctx.voice_client.disconnect()
 
+    @commands.command(name="play", aliases=["p"], help="Use [timestamp in seconds] song name to start playing from a certain part of a song")
+    async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
+
+        async with ctx.typing():
+            player = await YTDLSource.from_url(
+                url, loop=self.bot.loop, timestamp=timestamp
+            )
+            ctx.voice_client.play(
+                player, after=lambda e: print(f"Player error: {e}") if e else None
+            )
+
+        #     async def play(self, ctx, url):
+        #         print(ctx)
+        #         print(url)
+        #         if ctx.voice_client.is_playing():
+            serverid = ctx.guild
+
+            if self.bot.playlists.get(serverid) is None:
+                self.bot.playlists[serverid] = list()
+
+            else:
+                self.bot.playlists[serverid].append(url)
+                print(self.bot.playlists[serverid])
+
+            async with ctx.typing():
+                player = await YTDLSource.from_url(
+                    url, loop=self.bot.loop, stream=True, timestamp=timestamp
+                )
+                ctx.voice_client.play(
+                    player, after=lambda e: print("Player error: %s" % e) if e else None
+                )
+            await ctx.send("Now playing: {}".format(player.title))
+
     @commands.command(name="piss", aliases=["pissing"])
     async def piss(self, ctx):
         serverid = ctx.guild
@@ -91,28 +126,6 @@ class Song(commands.Cog):
 
         async with ctx.typing():
             player = await YTDLSource.from_url("Momentary bliss", loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(
-                player, after=lambda e: print("Player error: %s" % e) if e else None
-            )
-        await ctx.send("Now playing: {}".format(player.title))
-
-    @commands.command(name="play", aliases=["p"], help="Streams music")
-    async def play(self, ctx, *, url):
-        #     async def play(self, ctx, url):
-        #         print(ctx)
-        #         print(url)
-        #         if ctx.voice_client.is_playing():
-        serverid = ctx.guild
-
-        if self.bot.playlists.get(serverid) is None:
-            self.bot.playlists[serverid] = list()
-
-        else:
-            self.bot.playlists[serverid].append(url)
-            print(self.bot.playlists[serverid])
-
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(
                 player, after=lambda e: print("Player error: %s" % e) if e else None
             )
