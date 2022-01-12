@@ -2,8 +2,7 @@ import asyncio
 import typing
 import discord
 import youtube_dl
-from discord.ext import commands
-from discord.ext import tasks
+from discord.ext import tasks, commands
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ""
@@ -38,39 +37,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get("title")
         self.url = data.get("url")
 
-    @classmethod
-    async def from_url(cls, url, *, loop=None, stream=True, timestamp=0):
-        # moved the options from outside the class to inside the method.
-        # this allows the use of variables in the options
-        ffmpeg_options = {"options": f"-vn -ss {timestamp}"}
-        # rest of the from_url code
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            None, lambda: ytdl.extract_info(url, download=not stream)
-        )
-
-        if "entries" in data:
-            # take first item from a playlist
-            data = data["entries"][0]
-
-        filename = data["url"] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-
-class Song(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        print("Song initialised")
-#         self.bot.playlists = {}
-
-    @commands.command
-    async def on_ready():
-        print('client ready')
+    def cog_unload(self):
+        self.audio_player_task.cancel()
 
     @tasks.loop(seconds=1.0)
     async def audio_player_task(self, ctx):
+        print("hi")
         if not ctx.voice_client.is_playing() and not paused and len(playlist) > 0:
-            print("hi")
             async with ctx.typing():
                 player = await YTDLSource.from_url(
                     playlist[0], loop=self.bot.loop, stream=True, timestamp=0
@@ -90,6 +63,34 @@ class Song(commands.Cog):
 #
 #     def toggle_next():
 #         client.loop.call_soon_threadsafe(play_next_song.set)
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=True, timestamp=0):
+        # moved the options from outside the class to inside the method.
+        # this allows the use of variables in the options
+        ffmpeg_options = {"options": f"-vn -ss {timestamp}"}
+        # rest of the from_url code
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(
+            None, lambda: ytdl.extract_info(url, download=not stream)
+        )
+
+        if "entries" in data:
+            # take first item from a playlist
+            data = data["entries"][0]
+
+        filename = data["url"] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+class Song(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        print("Song initialised")
+#         self.bot.playlists = {}
+
+    @commands.command
+    async def on_ready():
+        print('client ready')
+
 
     @commands.command(name="join", aliases=["j"], help="Joins a voice channel")
     async def join(self, ctx):
@@ -212,9 +213,11 @@ class Song(commands.Cog):
         else:
             response = ""
             i = 1
-            for x in playlist:
-                response += "{} \t {} \n".format(i, x)
-                i += 1
+            for i, x in enumerate(playlist):
+                response += f"{i+1:<5}{x}" + "\n"
+#             for x in playlist:
+#                 response += "{} \t {} \n".format(i, x)
+#                 i += 1
             await ctx.message.channel.send(response)
 
     @commands.command(name="skip", help="Skips the current song")
