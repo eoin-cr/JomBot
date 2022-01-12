@@ -25,7 +25,10 @@ ytdl_format_options = {
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 playlist = []
+global paused
 paused = False
+global current
+current = ""
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
@@ -78,6 +81,8 @@ class Song(commands.Cog):
                 )
 
             await ctx.send("Now playing: {}".format(player.title))
+            global current
+            current = playlist[0]
             playlist.pop(0)
 
     @commands.command(name="join", aliases=["j"], help="Joins a voice channel")
@@ -104,7 +109,7 @@ class Song(commands.Cog):
         await ctx.voice_client.disconnect()
         self.audio_player_task.stop()
 
-    @commands.command(name="play", aliases=["p"], help="Use [timestamp in seconds] song name to start playing from a certain part of a song")
+    @commands.command(name="play", aliases=["p"], help="Adds a song to the queue")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
         voice_channel = ctx.author.voice.channel
 
@@ -119,8 +124,11 @@ class Song(commands.Cog):
             self.audio_player_task.start(ctx.guild, ctx)
 
         if len(playlist) > 0 or ctx.voice_client.is_playing():
-            playlist.append(url)
-            await ctx.send("{} has been added to the queue".format(url))
+            player = await YTDLSource.from_url(
+                url
+            )
+            playlist.append(player.title)
+            await ctx.send("{} has been added to the queue".format(player.title))
 
         else:
             async with ctx.typing():
@@ -131,27 +139,9 @@ class Song(commands.Cog):
                     player, after=lambda e: print(f"Player error: {e}") if e else None
                 )
 
-            #     async def play(self, ctx, url):
-            #         print(ctx)
-            #         print(url)
-            #         if ctx.voice_client.is_playing():
-    #             serverid = ctx.guild
-
-    #             if self.bot.playlists.get(serverid) is None:
-    #                 self.bot.playlists[serverid] = list()
-    #
-    #             else:
-    #                 self.bot.playlists[serverid].append(url)
-    #                 print(self.bot.playlists[serverid])
-
-                async with ctx.typing():
-                    player = await YTDLSource.from_url(
-                        url, loop=self.bot.loop, stream=True, timestamp=timestamp
-                    )
-                    ctx.voice_client.play(
-                        player, after=lambda e: print("Player error: %s" % e) if e else None
-                    )
-                await ctx.send("Now playing: {}".format(player.title))
+            global current
+            current = url
+            await ctx.send("Now playing: {}".format(player.title))
 
     @commands.command(name="piss", aliases=["pissing"])
     async def piss(self, ctx):
@@ -176,12 +166,15 @@ class Song(commands.Cog):
                 ctx.voice_client.play(
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
+            global current
+            current = "Momentary bliss"
             await ctx.send("Now playing: {}".format(player.title))
 
     @commands.command(name="pause", help="Pauses the song")
     async def pause(self, ctx):
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
+            global paused
             paused = True
             await ctx.message.channel.send("Paused!")
         else:
@@ -191,6 +184,7 @@ class Song(commands.Cog):
     async def resume(self, ctx):
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
+            global paused
             paused = False
             await ctx.message.channel.send("Resumed!")
         else:
@@ -225,6 +219,36 @@ class Song(commands.Cog):
             await ctx.message.channel.send("Skipped!")
         else:
             await ctx.message.channel.send("The bot is not playing any music")
+
+    @commands.command(name="seek", help="Seeks (in seconds) to a certain part of the song")
+    async def seek(self, ctx, timestamp):
+        print(current)
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+            global paused
+            paused = True
+        if current == "":
+            await ctx.message.channel.send("No song is playing")
+        else:
+            async with ctx.typing():
+                player = await YTDLSource.from_url(
+                    current, loop=self.bot.loop, stream=True, timestamp=timestamp
+                )
+                ctx.voice_client.play(
+                    player, after=lambda e: print(f"Player error: {e}") if e else None
+                )
+            paused = False
+            await ctx.send("Seeked to {}s".format(timestamp))
+
+    @commands.command(name="current", help="Displays the currently playing song")
+    async def current(self, ctx):
+        if current is not None and ctx.voice_client.is_playing():
+            player = await YTDLSource.from_url(
+                current
+            )
+            await ctx.send("Currently playing: {}".format(player.title))
+        else:
+            await ctx.send("No music is currently playing.")
 
 
 def setup(bot):
