@@ -58,8 +58,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class Song(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.audio_player_task.start(bot)
-#         self.audio_player_task.start()
+#         self.audio_player_task.start(ctx.guild)
         print("Song initialised")
 #         self.bot.playlists = {}
 
@@ -68,8 +67,7 @@ class Song(commands.Cog):
 
     @tasks.loop(seconds=1.0)
 #     async def audio_player_task(self, ctx):
-    async def audio_player_task(self, ctx):
-        print("hi")
+    async def audio_player_task(self, guild, ctx):
         if not ctx.voice_client.is_playing() and not paused and len(playlist) > 0:
             async with ctx.typing():
                 player = await YTDLSource.from_url(
@@ -90,6 +88,9 @@ class Song(commands.Cog):
             )
 
         voice_channel = ctx.author.voice.channel
+        if not self.audio_player_task.is_running():
+            self.audio_player_task.start(ctx.guild, ctx)
+
         if ctx.voice_client is None:
             vc = await voice_channel.connect()
         else:
@@ -101,6 +102,7 @@ class Song(commands.Cog):
     )
     async def leave(self, ctx):
         await ctx.voice_client.disconnect()
+        self.audio_player_task.stop()
 
     @commands.command(name="play", aliases=["p"], help="Use [timestamp in seconds] song name to start playing from a certain part of a song")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
@@ -112,6 +114,9 @@ class Song(commands.Cog):
         elif ctx.voice_client.channel != ctx.author.voice.channel:
             await ctx.voice_client.move_to(voice_channel)
             vc = ctx.voice_client
+
+        if not self.audio_player_task.is_running():
+            self.audio_player_task.start(ctx.guild, ctx)
 
         if len(playlist) > 0 or ctx.voice_client.is_playing():
             playlist.append(url)
@@ -158,6 +163,9 @@ class Song(commands.Cog):
         elif ctx.voice_client.channel != ctx.author.voice.channel:
             await ctx.voice_client.move_to(voice_channel)
             vc = ctx.voice_client
+
+        if not self.audio_player_task.is_running():
+            self.audio_player_task.start(ctx.guild, ctx)
 
         if len(playlist) > 0 or ctx.voice_client.is_playing():
             playlist.append("Momentary bliss")
