@@ -60,6 +60,21 @@ class Song(commands.Cog):
         print("Song initialised")
         self.bot.playlists = {}
 
+#     @commands.Cog.listener
+#     async def on_ready():
+#         print('client ready')
+#
+#     async def audio_player_task():
+#         while True:
+#             play_next_song.clear()
+#             current = await songs.get()
+#             current.start()
+#             await play_next_song.wait()
+#
+#
+#     def toggle_next():
+#         client.loop.call_soon_threadsafe(play_next_song.set)
+
     @commands.command(name="join", aliases=["j"], help="Joins a voice channel")
     async def join(self, ctx):
         if ctx.author.voice is None or ctx.author.voice.channel is None:
@@ -82,6 +97,13 @@ class Song(commands.Cog):
 
     @commands.command(name="play", aliases=["p"], help="Use [timestamp in seconds] song name to start playing from a certain part of a song")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
+        voice_channel = ctx.author.voice.channel
+        if ctx.voice_client is None or ctx.voice_channel != voice_channel:
+            if ctx.voice_client is None:
+                vc = await voice_channel.connect()
+            else:
+                await ctx.voice_client.move_to(voice_channel)
+                vc = ctx.voice_client
 
         async with ctx.typing():
             player = await YTDLSource.from_url(
@@ -116,6 +138,14 @@ class Song(commands.Cog):
     @commands.command(name="piss", aliases=["pissing"])
     async def piss(self, ctx):
         serverid = ctx.guild
+
+        voice_channel = ctx.author.voice.channel
+        if ctx.voice_client is None or ctx.voice_channel != voice_channel:
+            if ctx.voice_client is None:
+                vc = await voice_channel.connect()
+            else:
+                await ctx.voice_client.move_to(voice_channel)
+                vc = ctx.voice_client
 
         if self.bot.playlists.get(serverid) is None:
             self.bot.playlists[serverid] = list()
