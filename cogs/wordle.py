@@ -60,7 +60,7 @@ class Wordle(commands.Cog):
                         await ctx.send(self.message)
                         self.guesses += 1
                         if self.guesses >= 6:
-                            await ctx.send("Game over - You have run out of guesses!")
+                            await ctx.send("Game over - You have run out of guesses!  The word was {}".format(self.word))
                             self.started = False
                             self.timer.stop()
 
