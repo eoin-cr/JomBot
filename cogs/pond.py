@@ -3,7 +3,6 @@ import os
 import re
 import discord
 import requests
-from dotenv import load_dotenv
 from discord.ext import commands
 import json
 from discord.utils import find
@@ -24,8 +23,8 @@ class Pond(commands.Cog):
 
             if voice_state is None:
                 await ctx.send('Shut the fuck up groovy')
-                return await ctx.remove    
-      
+                return await ctx.remove
+
 
     @commands.Cog.listener()
     async def on_message(self,message):
@@ -44,45 +43,36 @@ class Pond(commands.Cog):
                     # await message.author.add_roles(message.author, role)
                     return await ch.send(f"Welcome to the pond {message.author.mention}")
 
-            if message.content.startswith("🦶") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
-#                 print("kicking")
-                cont = message.content.split(' ')
-                auth = int(cont[1].strip('@,<>,!'))
-                memb = await message.guild.fetch_member(auth)
-                if message.author.id == auth:
-                    return await message.channel.send("You can't kick yourself I'm afraid!")
-                await memb.kick(reason="You were inactive and have been footed")
-                return await message.channel.send("Goodbye goofball <:pixellice:829423250361679922>")
-
-            if message.content.startswith("!Q") and message.author.id == 484444017489084416:
-#                 print("sending answers!")
-                cont = message.content[3:]
-                split = cont.split('\n')
-                #print(split)
-                #for i in range(len(split)):
-                    #print("~~~~")
-                    #print(len(split))
-                    #print(i)
-                #    if i <= len(split) and split[i] == '':
-                        #print(split[i])
-                #        split.pop(i)
-                for i in range(len(split)):
-                    if split[i].startswith("Q"):
-                        split[i] = split[i].replace(".", ":", 1)
-                    elif '/' not in split[i]:
-                        split[i] = f"- {split[i]}"
-                    #else:
-                    #    split[i] = f"- {split[i]}"
-
-                qsChannel = message.guild.get_channel(834198286310047784)
-                joined = '\n'.join(split)
-                full_message = str(f"```yaml\n{joined} \n```")
-                return await qsChannel.send(full_message)
-
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")
 
+    @commands.command(name="foot", alias="🦶", help="Kicks someone")
+    async def foot(self, ctx, user):
+        if ctx.message.guild is not None and ctx.message.guild.id == 829349685667430460 and ctx.message.author.guild_permissions.kick_members:
+#             if message.content.startswith("🦶") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
+#                 print("kicking")
+            auth = int(user.strip('@,<>,!'))
+            memb = await ctx.message.guild.fetch_member(auth)
+            if ctx.message.author.id == auth:
+                return await ctx.send("You can't kick yourself I'm afraid!")
+            await memb.kick(reason="You were inactive and have been footed")
+            return await ctx.send("Goodbye goofball <:pixellice:829423250361679922>")
 
+    @commands.command(name="Q", help="Formats Jom's questions")
+    async def Q(self, ctx, *, cont):
+        if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and ctx.message.guild.id == 829349685667430460:
+            split = cont.split('\n')
+            for i in range(len(split)):
+                if split[i].startswith("Q"):
+                    split[i] = split[i].replace(".", ":", 1)
+                elif '/' not in split[i]:
+                    split[i] = f"- {split[i]}"
+
+            qsChannel = message.guild.get_channel(834198286310047784)
+#             qsChannel = ctx.message.guild.get_channel(829358413065486376)
+            joined = '\n'.join(split)
+            full_message = str(f"```yaml\n{joined} \n```")
+            return await qsChannel.send(full_message)
 
     @commands.command()
     async def jomwheel(self,message,ctx, *arg):
@@ -103,26 +93,6 @@ class Pond(commands.Cog):
             await message.channel.send("*clickclickclickclick*")
             return await message.channel.send(wheel[num])
 
-    # @commands.command()
-    # async def Q(self,ctx,*args):
-    #     if ctx.author.id == 484444017489084416:
-    # # if message.content.startswith("!Q") and message.author.id == 484444017489084416:
-    #         print("sending answers!")
-    #         # cont = message
-    #         message = ' '.join(args)
-    #         print(message)
-    #         split = message.split('\n')
-    #         for i in range(len(split)):
-    #             if split[i].startswith("Q"):
-    #                 split[i] = split[i].replace(".", ":", 1)
-    #             elif '/' not in split[i]:
-    #                 split[i] = f"- {split[i]}"
-    #
-    #         qsChannel = ctx.guild.get_channel(829358413065486376)
-    #         joined = '\n'.join(split)
-    #         full_message = str(f"```yaml\n{joined}\n```")
-    #         return await qsChannel.send(full_message)
-
     @commands.command()
     async def reply(self,ctx):
         return await ctx.reply('Hello')
@@ -138,18 +108,10 @@ class Pond(commands.Cog):
     @commands.command()
     async def introduce(self,ctx):
         return await ctx.send("""Hey there and welcome to the server!
-        Be sure to answer the questions in <#830565670805962822> and then check
-        out <#830565732001644555> and <#830565778654887958> for more information!
-        Also when enabled I will delete every message containing sus, vented, etc.
-        So if your messages are getting removed, that might be why""")
-    # if message.mention_everyone:
-    #     return await message.channel.send("This seems important <:flosh:701774266894647338>")
-    #
-    #
-    # if message.author.id == 85400548534145024 and message.content == "!enable ban":
-    #     response = "!disable ban"
-    #     await message.channel.send(response)
-    #     return
+Be sure to answer the questions in <#830565670805962822> and then check
+out <#830565732001644555> and <#830565778654887958> for more information!
+Also when enabled I will delete every message containing sus, vented, etc.
+So if your messages are getting removed, that might be why""")
 
     @commands.command()
     async def test(self,message):
@@ -171,27 +133,27 @@ class Pond(commands.Cog):
     @commands.command()
     async def alias(self,message):
         #open text file in read mode
-      text_file = open("words.txt", "r")
+        text_file = open("words.txt", "r")
           #read whole file to a string
-      words = text_file.read()
+        words = text_file.read()
     # time = time.perf_counter()
 
-      loopNum = random.randint(3,10)
-      sentence = ""
-      Mauth = str(message.author)
-      if words is not None:
-        words = words.split('\n')
-        for x in range(loopNum):
-          index = random.randint(0,466550)
-          sentence = sentence + words[index] + " "
-          # print(sentence)
-        response = sentence
-        await message.channel.send(response)
-        return
-      else:
-        response = "Uh oh there's been a fucky wucky"
-        await message.channel.send(response)
-        return
+        loopNum = random.randint(3,10)
+        sentence = ""
+        Mauth = str(message.author)
+        if words is not None:
+            words = words.split('\n')
+            for x in range(loopNum):
+                index = random.randint(0,466550)
+                sentence = sentence + words[index] + " "
+                # print(sentence)
+            response = sentence
+            await message.channel.send(response)
+            return
+        else:
+            response = "Uh oh there's been a fucky wucky"
+            await message.channel.send(response)
+            return
 
 def setup(bot):
     bot.add_cog(Pond(bot))
