@@ -66,8 +66,8 @@ async def on_member_join(member):
     with open('invites.txt', 'w') as file:
         file.write('\n'.join([str(x) for x in list]))
 
-@bot.event
-async def on_message(message):
+# @bot.event
+# async def on_message(message):
 
     # Legacy code for debugging invites checker
 #     if message.content == "inv_txt":
@@ -88,6 +88,7 @@ async def on_message(message):
 
 # Just a quick command to see how they work.  Also a good checker to see if
 # the bot is online
+
 @bot.command()
 async def hello(ctx):
     hello = "Hello!"
