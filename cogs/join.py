@@ -3,9 +3,10 @@ import os
 import re
 import discord
 import requests
-from dotenv import load_dotenv
 from discord.ext import commands
 
+# MOst of this code isn't used anymore, however you want it you may? be able
+# to uncomment most of it?  I can't quite remember how well this code works
 
 # class Join(commands.Cog):
 #     def __init__(self,bot):
