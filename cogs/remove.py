@@ -3,11 +3,14 @@ import os
 import re
 import discord
 import requests
-from dotenv import load_dotenv
 from discord.ext import commands
 import json
 from discord.utils import find
 
+# Note: There's probably improvements to be made to this code, however, this
+# program is never used anymore, so I've stopped updating it for now.
+# I believe the channel specific removal functions don't quite work properly
+# either
 
 class Remove(commands.Cog):
     def __init__(self,bot):
