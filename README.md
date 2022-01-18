@@ -1,5 +1,5 @@
 # JomBot
 
-Does stuff and things
+Does stuff and things.
 
-Music player works, but I still need to implement a queue and seek feature.
+^(Aha oops didn't mean to wipe the entire repo rip all my commits)
