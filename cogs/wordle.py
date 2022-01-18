@@ -79,11 +79,8 @@ class Wordle(commands.Cog):
             self.words = self.words.split('\n')
             index = random.randint(0,3301)
             self.word = self.words[index]
-            await ctx.send(self.word)
             self.message = ""
             self.guesses = 0
-#         else:
-#             await ctx.send("Invalid command.
 
     @commands.command(name="time", help="Extends your wordle time")
     async def time(self, ctx):
