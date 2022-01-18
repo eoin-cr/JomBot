@@ -74,7 +74,7 @@ class Wordle(commands.Cog):
                 self.timer.start(ctx)
             self.started = True
             self.user = ctx.message.author
-            text_file = open("../wiki-100k.txt", "r")
+            text_file = open("wiki-100k.txt", "r")
             self.words = text_file.read()
             self.words = self.words.split('\n')
             index = random.randint(0,3301)
@@ -84,15 +84,22 @@ class Wordle(commands.Cog):
 
     @commands.command(name="time", help="Extends your wordle time")
     async def time(self, ctx):
-        self.loops = 0
-        self.timer.restart(ctx)
+        if ctx.message.author == self.user:
+            self.loops = 0
+            self.timer.restart(ctx)
+            await ctx.send("Time extended")
+        else:
+            await ctx.send("You cannot extend someone else's time!")
 
     @commands.command(name="quit", help="Stops your wordle game")
     async def quit(self, ctx):
-        self.loops = 0
-        self.timer.stop()
-        self.started = False
-        await ctx.send("Stopped game")
+        if ctx.message.author == self.user:
+            self.loops = 0
+            self.timer.stop()
+            self.started = False
+            await ctx.send("Stopped game")
+        else:
+            await ctx.send("You cannot stop someone elses game!")
 
     @commands.command()
     async def time_test(self, ctx):
