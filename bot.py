@@ -89,7 +89,6 @@ async def hello(ctx):
     await ctx.send(hello)
 
 
-# bot.load_extension("cogs.trading")
 bot.load_extension("cogs.crypto")
 bot.load_extension("cogs.pond")
 # bot.load_extension("cogs.remove")
@@ -97,7 +96,6 @@ bot.load_extension("cogs.pond")
 # bot.load_extension("cogs.binder_check")
 # bot.load_extension("cogs.jokes")
 bot.load_extension("cogs.ip")
-# bot.load_extension("cogs.music")
 bot.load_extension("cogs.song")
 bot.load_extension("cogs.wordle")
 

@@ -7,17 +7,21 @@ from discord.ext import commands
 import json
 from discord.utils import find
 
-# Note: There's probably improvements to be made to this code, however, this
-# program is never used anymore, so I've stopped updating it for now.
-# I believe the channel specific removal functions don't quite work properly
-# either
+# Note: This program is very rarely used anymore, so I've stopped improving
+# formatting/updating functionality.  There are issues with the server and
+# channel specific censor commands.  This will likely not be fixed for now
+# due to the rare use.  If you decide you want this to work on your own bot
+# removing all the channel specific code should allow this program to work
+# but I'm not certain.  It likely would only take a little bit of modifying
+# to get the channel specific features to work though.  Also make sure you
+# have a servers directory in the main dir for the server specific commands.
 
 class Remove(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
         print("1984 initialised")
 
-    @commands.command(name='1984')
+    @commands.command(name='1984', alias="1984")
     async def nineteen(self, message, arg, *arg2):
             # async def 1984(self,message):
     # if message.content.startswith("!1984") and message.author.guild_permissions.manage_guild and message.guild.id is not None:
