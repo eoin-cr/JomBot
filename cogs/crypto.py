@@ -175,7 +175,7 @@ coin balance too low.  Your current {} balance is {}""".format(coin, data.get(co
             data["USD"] += amount
             all = data[coin]
             data[coin] = 0
-            await ctx.send("Successfully traded {:0.2f}{} for ${:0.2f}".format(coin_amount, coin.upper(), all)
+            await ctx.send("Successfully traded {:0.2f}{} for ${:0.2f}".format(coin_amount, coin.upper(), all))
 
         # Calculation for calculating a certain amount of a coin
         else:
