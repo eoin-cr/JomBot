@@ -48,6 +48,7 @@ class Wordle(commands.Cog):
 
                     # Changes game state and stops timer
                     self.started = False
+                    self.loops = 0
                     self.timer.stop()
 
                 else:
@@ -84,6 +85,7 @@ class Wordle(commands.Cog):
 
                             # Changes game state and stops timer
                             self.started = False
+                            self.loops = 0
                             self.timer.stop()
 
             # If the wrong user is trying to play, ignores their guess
@@ -96,6 +98,7 @@ class Wordle(commands.Cog):
 
             # Checks if the timer is already running to avoid errors when
             # attempting to start a running task
+            self.loops = 0
             if self.timer.is_running():
                 self.timer.restart(ctx)
             else:
