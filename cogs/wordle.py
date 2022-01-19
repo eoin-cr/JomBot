@@ -87,6 +87,10 @@ class Wordle(commands.Cog):
                             self.started = False
                             self.loops = 0
                             self.timer.stop()
+                        else:
+                            # Restarts the timer after every guess
+                            self.loops = 0
+                            self.timer.restart(ctx)
 
             # If the wrong user is trying to play, ignores their guess
             else:
@@ -112,7 +116,13 @@ class Wordle(commands.Cog):
             text_file = open("wiki-100k.txt", "r")
             self.words = text_file.read()
             self.words = self.words.split('\n')
-            index = random.randint(0,3301)
+
+            # Counts number of words
+            count = 0
+            for word in self.words:
+                count += 1
+
+            index = random.randint(0,count)
             self.word = self.words[index]
             self.message = ""
             self.guesses = 0

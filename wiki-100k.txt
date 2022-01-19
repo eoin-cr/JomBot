@@ -774,7 +774,6 @@ dealt
 minor
 laura
 slope
-pobox.com
 humor
 bench
 wheat
@@ -1240,7 +1239,6 @@ flags
 bored
 melan
 pglaf
-pglaf.org.
 curls
 efter
 staid
@@ -1263,7 +1261,6 @@ irene
 sauce
 paved
 annie
-promo.net
 muddy
 sexes
 users
