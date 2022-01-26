@@ -54,23 +54,26 @@ class Pond(commands.Cog):
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")
 
-    @commands.command(name="foot", alias="🦶", help="Kicks someone")
-    async def foot(self, ctx, user):
-        # Checks if in right server, and if perms are correct
-        if ctx.message.guild is not None and ctx.message.guild.id == 829349685667430460 and ctx.message.author.guild_permissions.kick_members:
-            # Removes characters from tag to get user id
-            auth = int(user.strip('@,<>,!'))
 
-            # Fetches member
-            memb = await ctx.message.guild.fetch_member(auth)
+            # Doesn't work as a command as it would need a prefix which is cringe
+            # Checks if in right server, and if perms are correct
+            if message.content.startswith("🦶") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
+                # Splits message content
+                cont = message.content.split(' ')
 
-            # Checks if you tagged yourself
-            if ctx.message.author.id == auth:
-                return await ctx.send("You can't kick yourself I'm afraid!")
+                # Removes characters from tag to get user id
+                auth = int(cont[1].strip('@,<>,!'))
 
-            # Otherwise, kicks them
-            await memb.kick(reason="You were inactive and have been footed")
-            return await ctx.send("Goodbye goofball <:pixellice:829423250361679922>")
+                # Fetches member
+                memb = await message.guild.fetch_member(auth)
+
+                # Checks if you tagged yourself
+                if message.author.id == auth:
+                    return await message.channel.send("You can't kick yourself I'm afraid!")
+
+                # Otherwise, kicks them
+                await memb.kick(reason="You were inactive and have been footed")
+                return await message.channel.send("Goodbye goofball <:pixellice:829423250361679922>")
 
     @commands.command(name="Q", help="Formats Jom's questions")
     async def Q(self, ctx, *, cont):
