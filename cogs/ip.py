@@ -26,7 +26,7 @@ class IP(commands.Cog):
         # Checks if IP has changed, and if so sends a message and updates
         # the old IP value
         if IP != old_IP:
-            await message.channel.send("Your IP changed!  It is now {}".format(IP))
+            await message.channel.send(f'Your IP changed!  It is now {IP}')
             old_IP = IP
 
     # Command to display IP
