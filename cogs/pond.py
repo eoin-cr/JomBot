@@ -157,6 +157,20 @@ So if your messages are getting removed, that might be why""")
             for i in range (0, len(invite_list)):
                 print(invite_list[i].uses)
 
+    # Secret command that doesn't do anything at all :)
+    @commands.command(name="send")
+    async def send(self,ctx, *message):
+        # Checks channel id
+        if ctx.channel.id == 824766240589086761:
+            # Gets specific channel
+            general = self.bot.get_channel(829349688197120052)
+
+            # Joins tuple into single message
+            message = ' '.join(map(str, message))
+
+            # Sends message to channel
+            await general.send(message)
+
     @commands.command(name="alias", help="alias")
     async def alias(self,message):
         #open text file in read mode
