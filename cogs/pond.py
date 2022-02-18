@@ -171,6 +171,34 @@ So if your messages are getting removed, that might be why""")
             # Sends message to channel
             await general.send(message)
 
+    # Just a quick and basic way of getting the current time for different users
+    @commands.command(name="time", help="Displays current time in certain timezones")
+    async def time(self,message,area):
+        now = datetime.now()
+        area = area.lower()
+
+        # TODO: Check for under/overflow (e.g. if it's currently 0025 here, if
+        # someone runs the command for america I suspect it'll go negative
+
+        # Obviously there's more than 1 timezone in america but we only need
+        # this one
+        if area == "us" or area == "america":
+            # Get the current time, minus 8 from the hours and add it to a
+            # string with the time
+            time = "" + str(int(now.strftime("%H")) - 8) + ":" + str(now.strftime("%M:%S"))
+            await message.channel.send(time)
+
+        # If Ireland/UK is chosen, simply return the current time (my server is
+        # running in ireland)
+        elif area == "uk" or area == "england" or area == "ireland":
+            time = str(now.strftime("%H:%M:%S"))
+            await message.channel.send(time)
+
+        # Add 1 to the hours for Serbia
+        elif area == "serbia":
+            time = "" + str(int(now.strftime("%H")) + 1) + str(now.strftime(":%M:%S"))
+            await message.channel.send(time)
+
     @commands.command(name="alias", help="alias")
     async def alias(self,message):
         #open text file in read mode
