@@ -72,6 +72,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class Song(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.paused = False
+        self.playlist = []
+        self.pretty_playlist = []
+        self.current = ""
 #         self.audio_player_task.start(ctx.guild)
         print("Song initialised")
 
