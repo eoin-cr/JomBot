@@ -17,7 +17,6 @@ intents = discord.Intents.default()
 intents.members = True
 
 
-
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -104,6 +103,7 @@ bot.load_extension("cogs.pond")
 bot.load_extension("cogs.ip")
 bot.load_extension("cogs.song")
 bot.load_extension("cogs.wordle")
+bot.load_extension("cogs.time")
 
 # Runs the bot using a .env stored bot token
 bot.run(TOKEN)
