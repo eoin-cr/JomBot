@@ -5,6 +5,8 @@ from discord.ext import commands
 from numpy import loadtxt
 from datetime import datetime
 
+# TODO: use better file stuff than just a txt file - json file perhaps
+
 class Time(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
@@ -66,9 +68,19 @@ class Time(commands.Cog):
                 await message.channel.send("No timezone found for that user")
 
 
-    @commands.command(name="set-time", aliases=["set time", "set_time", "time-set"], help="Sets your timezone")
-    async def settime(self, message, zone):
-        user = message.author.id
+    @commands.command(name="set-time", aliases=["set time", "set_time", "time-set"], help="Sets your timezone (use UTC+/-X")
+    async def settime(self, message, zone, *user):
+        if user is None:
+            user = message.author.id
+            print("NONE!")
+        else:
+            temp = user
+            user = zone
+            zone = temp
+            user = int(user.strip('@,<>,!,()'))
+
+        print(zone)
+        zone = ''.join(zone)
         zone = zone.lower().replace("utc", "")
         with open('timezones.txt', 'a') as f:
             f.write(f'\n{user} {zone}')
