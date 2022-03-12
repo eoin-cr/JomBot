@@ -29,7 +29,7 @@ class Time(commands.Cog):
 
         elif area == "serbia":
             hour = int(now.strftime("%H")) + 1
-            if hour > 24:
+            if hour >= 24:
                 hour -= 24
             time = "" + str(hour) + str(now.strftime(":%M:%S"))
             await message.channel.send(time)
@@ -58,7 +58,7 @@ class Time(commands.Cog):
                     if line[0] == str(area):
                         print("Entering!")
                         hour = int(now.strftime("%H")) + int(line[1])
-                        if hour > 24:
+                        if hour >= 24:
                             hour -= 24
                         elif hour < 0:
                             hour += 24
