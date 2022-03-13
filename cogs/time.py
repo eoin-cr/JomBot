@@ -68,7 +68,7 @@ class Time(commands.Cog):
                 await message.channel.send("No timezone found for that user")
 
 
-    @commands.command(name="set-time", aliases=["set time", "set_time", "time-set"], help="Sets your timezone (use UTC+/-X")
+    @commands.command(name="set-time", aliases=["set time", "set_time", "time-set"], help="Sets your timezone (use UTC+/-X)")
     async def settime(self, message, zone, *user):
         if user is None:
             user = message.author.id
@@ -82,6 +82,8 @@ class Time(commands.Cog):
         print(zone)
         zone = ''.join(zone)
         zone = zone.lower().replace("utc", "")
+        if int(zone) < -12 or int(zone) > 12:
+            return await message.channel.send("Invalid timezone")
         with open('timezones.txt', 'a') as f:
             f.write(f'\n{user} {zone}')
         await message.channel.send("Timezone set!")
