@@ -124,8 +124,10 @@ class Pond(commands.Cog):
 
     # Prints a message to the terminal - handy for getting emoji ids and the like
     @commands.command()
-    async def print(self,ctx,message):
-        return print(message)
+    async def print(self,ctx,*message):
+        str = ' '.join(message)
+        print(str)
+#         return print(message)
 
     @commands.command(name="short", help="ha")
     async def short(self,ctx):

@@ -21,7 +21,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 # The prefix is either ! or a little chicken emoji.  How fun :)
-bot = commands.Bot(command_prefix=("!","<:chigmn2:829382748631203901>"))
+bot = commands.Bot(command_prefix=["!",'<:chigmn2:829382748631203901> '])
 
 @bot.event
 async def on_member_join(member):
