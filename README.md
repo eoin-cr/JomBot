@@ -6,9 +6,7 @@ Does stuff and things.
 
 ---
 
-Default prefix: !
-
-Features:
+## Features:
 * Can set role upon new user messaging a selected channel (and then welcome them
 to the server)
 * Music player with queue and seek functionality
@@ -17,6 +15,31 @@ to the server)
 * Can tell you the IP of the server it's hosted on and let you know when it changes
   (useful if you're self hosting and don't have a static domain)
 * Crypto trading simulator using real time prices from the cryptocompare API
+
+Default prefix: `!`
+
+---
+
+## Self-hosting JomBot
+[Article on creating a bot token](https://www.writebots.com/discord-bot-token/)
+
+Once you have your token, download the JomBot repo and unzip it.  Create a file called just
+`.env` with the layout
+```
+# .env
+DISCORD_TOKEN=INSERT YOUR DISCORD TOKEN HERE
+```
+and put the file in the same directory as the bot.py file.
+
+Then to run the bot you'll want to simply run `python3 bot.py` and it should be working.
+Note that the bot will only be running for as long as your terminal is open, so I'd 
+recommend using tmux to create terminal instances so it will be running as long as your
+computer is on.  I believe there are also some free cloud hosting options you could use
+to host the bot instead of leaving your computer on all the time.
+
+NOTE: Whilst most of the functionality should work out of the box, there are several 
+commands that will only run on certain servers.  Change the id the command looks for in
+code to the id of your server/channel.
 
 ---
 
