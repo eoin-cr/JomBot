@@ -10,6 +10,16 @@ class Pond(commands.Cog):
         self.bot = bot
         print("Pond initialised")
 
+    @commands.command(name="hi")
+    @commands.cooldown(rate=1, per=5, type=commands.BucketType.member)
+    async def hi(self, ctx):
+        await ctx.send("Hi!")
+
+    @commands.command(name="manage_messages_check")
+    @commands.has_guild_permissions(manage_messages=True)
+    async def manage(self, ctx):
+        await ctx.send("You have manage messages perms!")
+
     # Code from when groovy was still a thing and would announce whenever
     # it dced from the vc
     @commands.Cog.listener()
