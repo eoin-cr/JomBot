@@ -28,7 +28,7 @@ class IP(commands.Cog):
             self.old_ip = ip_address
 
     # Command to display IP
-    @commands.command()
+    @commands.command(hidden=True)
     async def send_ip(self, message):
         # Checks if it was requested in my own server
         if message.guild.id == 786732353098743930:

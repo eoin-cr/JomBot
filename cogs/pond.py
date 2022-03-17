@@ -3,6 +3,13 @@ import discord
 from discord.ext import commands
 import random
 import asyncio
+import bot as main
+
+
+def pond_check():
+    def predicate(ctx):
+        return ctx.guild.id == 829349685667430460
+    return commands.check(predicate)
 
 
 class Pond(commands.Cog):
@@ -20,24 +27,12 @@ class Pond(commands.Cog):
     async def manage(self, ctx):
         await ctx.send("You have manage messages perms!")
 
-    # Code from when groovy was still a thing and would announce whenever
-    # it dced from the vc
     @commands.Cog.listener()
-    async def on_message(self, ctx):
-        if ctx.author.id == 234395307759108106:
-            voice_state = ctx.member.voice
-            await asyncio.sleep(5)
-
-            # If it's not in a voice channel and sends a message, delete it
-            # and give out to it
-            if voice_state is None:
-                await ctx.send('Shut the fuck up groovy')
-                return await ctx.remove
-
-    @commands.Cog.listener()
+    @pond_check()  # Doesn't seem to work?
     async def on_message(self, message):
         if message.guild is not None and message.guild.id == 829349685667430460:
             # Checks if a message was sent in the introductions channel
+            # if message.channel.id == 829358413065486376:
             if message.channel.id == 830565670805962822:
                 role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
                 role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
@@ -50,10 +45,16 @@ class Pond(commands.Cog):
                 # Otherwise, give them the tadpole role so they can speak
                 else:
                     ch = message.guild.get_channel(829349688197120052)
+                    # ch = message.guild.get_channel(829358413065486376)
                     # print(message.guild.roles)
                     await message.author.add_roles(role1)
                     # await message.author.add_roles(message.author, role)
-                    return await ch.send(f"Welcome to the pond {message.author.mention}")
+                    embed = main.embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
+                    await ch.send(embed=embed)
+
+                    # Sends a message mentioning the user and then deletes it after 1 second because
+                    # discord embeds don't notify someone if they've been tagged.
+                    await ch.send(message.author.mention, delete_after=1)
 
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")
@@ -79,7 +80,7 @@ class Pond(commands.Cog):
                 await memb.kick(reason="You were inactive and have been footed")
                 return await message.channel.send("Goodbye goofball <:pixellice:829423250361679922>")
 
-    @commands.command(name="Q", help="Formats Jom's questions")
+    @commands.command(name="Q", help="Formats Jom's questions", hidden=True)
     async def Q(self, ctx, *, cont):
         # Checks if I sent the message and if it's in the right server
         if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and \
@@ -104,6 +105,7 @@ class Pond(commands.Cog):
             return await qs_channel.send(full_message)
 
     @commands.command(name="jomwheel", help="Spins the jomwheel")
+    @pond_check()
     async def jomwheel(self, message, *arg):
         if arg[1] == 's':
             # Opens file, picks a random num, and selects that voice line
@@ -125,21 +127,27 @@ class Pond(commands.Cog):
 
     @commands.command(name="reply", help="Replies to your message")
     async def reply(self, ctx):
-        return await ctx.reply('Hello')
+        # embed = main.embed_func(ctx, "\u200b", "Hello!")
+        # embed = main.embed_func(ctx, "Hello!", "\u200b")
+        embed = main.embed_func(ctx, "Reply", "Hello!")
+        await ctx.reply(embed=embed)
+        # return await ctx.reply('Hello')
 
     # Prints a message to the terminal - handy for getting emoji ids and the like
-    @commands.command()
+    @commands.command(hidden=True)
     async def print(self, *message):
         string = ' '.join(message)
         print(string)
 
-    #         return print(message)
-
-    @commands.command(name="short", help="ha")
+    @commands.command(name="short", help="ha", hidden=True)
+    @pond_check()
     async def short(self, ctx):
-        return await ctx.send("Ha lark is short")
+        embed = main.embed_func(ctx, "Short", "Ha lark is short")
+        await ctx.send(embed=embed)
+        # return await ctx.send("Ha lark is short")
 
     @commands.command(name="introduce", help="Introduces someone")
+    @pond_check()
     async def introduce(self, ctx):
         return await ctx.send("""Hey there and welcome to the server!
 Be sure to answer the questions in <#830565670805962822> and then check
@@ -159,7 +167,7 @@ So if your messages are getting removed, that might be why""")
         return
 
     # Lists invites, used it for debugging something before
-    @commands.command()
+    @commands.command(hidden=True)
     async def ls(self, ctx, message):
         if message == "invites":
             invite_list = await ctx.guild.invites()
@@ -167,7 +175,7 @@ So if your messages are getting removed, that might be why""")
                 print(invite_list[i].uses)
 
     # Secret command that doesn't do anything at all :)
-    @commands.command(name="send")
+    @commands.command(name="send", hidden=True)
     async def send(self, ctx, *message):
         # Checks channel id
         if ctx.channel.id == 824766240589086761:
@@ -181,6 +189,7 @@ So if your messages are getting removed, that might be why""")
             await general.send(message)
 
     @commands.command(name="alias", help="alias")
+    @pond_check()
     async def alias(self, message):
         # open text file in read mode
         text_file = open("words.txt", "r")

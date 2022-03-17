@@ -1,4 +1,5 @@
 # error.py
+import discord
 from discord.ext import commands
 
 
@@ -38,11 +39,18 @@ class ErrorHandler(commands.Cog):
             case commands.BotMissingPermissions:
                 message = "JomBot is missing the perms to run this command.  Please fix the permissions!"
             case commands.CommandInvokeError:
-                message = "There was an invoke error.  You might have the incorrect number of arguments"
+                message = "There was an invoke error.  There is probably a mistake in one of your arguments."
+            case commands.CheckFailure:
+                return
             case _:
                 message = "Oh no! Something went wrong while running the command!"
 
-        await ctx.send(message, delete_after=5)
+        error_str = str(type(error)).replace("<class 'discord.ext.commands.errors.", "")
+        error_str = error_str.replace("'>", "")
+        embed = discord.Embed(color=discord.Color.red())
+        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+        embed.add_field(name=error_str, value=message, inline=False)
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot):

@@ -3,6 +3,8 @@ import asyncio
 import discord
 import youtube_dl
 from discord.ext import tasks, commands
+import cogs.pond as pond
+import bot as main
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ""
@@ -73,13 +75,17 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 async def queue_func(ctx, playlist):
     if len(playlist) == 0:
-        await ctx.message.channel.send("The queue is empty")
+        embed = main.embed_func(ctx, "Playlist", "The queue is empty", discord.Color.red())
+        await ctx.message.channel.send(embed=embed)
+        # await ctx.message.channel.send("The queue is empty")
     else:
         response = ""
         i = 1
         for i, x in enumerate(playlist):
             response += f"{i + 1:<5}{x}" + "\n"
-        await ctx.message.channel.send(response)
+        # await ctx.message.channel.send(response)
+        embed = main.embed_func(ctx, "Playlist", response)
+        await ctx.message.channel.send(embed=embed)
 
 
 class Song(commands.Cog):
@@ -153,6 +159,9 @@ class Song(commands.Cog):
         else:
             await ctx.voice_client.move_to(voice_channel)
 
+        embed = main.embed_func(ctx, "Join", "I have joined your voice channel!")
+        await ctx.send(embed=embed)
+
     @commands.command(
         name="leave", aliases=["disconnect", "dc"], help="Leaves a voice channel"
     )
@@ -160,6 +169,9 @@ class Song(commands.Cog):
         # Leaves the vc and stops the playlist task
         await ctx.voice_client.disconnect()
         self.audio_player_task.stop()
+
+        embed = main.embed_func(ctx, "Disconnect", "I have left your voice channel!", discord.Color.purple())
+        await ctx.send(embed=embed)
 
     @commands.command(name="play", aliases=["p"], help="Adds a song to the queue")
     async def play(self, ctx, timestamp: typing.Optional[int] = 0, *, url):
@@ -172,7 +184,8 @@ class Song(commands.Cog):
             )
             self.playlist.append(url)
             self.pretty_playlist.append(player.title)
-            await ctx.send("{} has been added to the queue".format(player.title))
+            embed = main.embed_func(ctx, "Play", f"{player.title} has been added to the queue")
+            await ctx.send(embed=embed)
 
         # Otherwise, immediately start playing the song
         else:
@@ -185,9 +198,11 @@ class Song(commands.Cog):
                 )
 
             self.current = url
-            await ctx.send("Now playing: {}".format(player.title))
+            embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
+            await ctx.send(embed=embed)
 
-    @commands.command(name="piss", aliases=["pissing"])
+    @commands.command(name="piss", aliases=["pissing"], hidden=True)
+    @pond.pond_check()
     async def piss(self, ctx):
         await self.join_func(ctx)
 
@@ -197,32 +212,39 @@ class Song(commands.Cog):
         if len(self.playlist) > 0 or ctx.voice_client.is_playing():
             self.playlist.append("Momentary bliss")
             self.pretty_playlist.append(player.title)
-            await ctx.send("Momentary bliss has been added to the queue")
+
+            embed = main.embed_func(ctx, "Play", f"Momentary bliss has been added to the queue")
+            await ctx.send(embed=embed)
         else:
             async with ctx.typing():
                 ctx.voice_client.play(
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
             self.current = "Momentary bliss"
-            await ctx.send("Now playing: {}".format(player.title))
+            embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
+            await ctx.send(embed=embed)
 
     @commands.command(name="pause", help="Pauses the song")
     async def pause(self, ctx):
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
             self.paused = True
-            await ctx.message.channel.send("Paused!")
+            embed = main.embed_func(ctx, "Pause", "The song has been paused!")
+            await ctx.send(embed=embed)
         else:
-            await ctx.message.channel.send("The bot is not playing any music")
+            embed = main.embed_func(ctx, "Pause", "The bot is not playing any music!", discord.Color.red())
+            await ctx.send(embed=embed)
 
     @commands.command(name="resume", help="Resumes the song")
     async def resume(self, ctx):
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
             self.paused = False
-            await ctx.message.channel.send("Resumed!")
+            embed = main.embed_func(ctx, "Resume", "The song has been resumed!")
+            await ctx.send(embed=embed)
         else:
-            await ctx.message.channel.send("No music has been self.paused")
+            embed = main.embed_func(ctx, "Resume", "No music has been paused!", discord.Color.red())
+            await ctx.send(embed=embed)
 
     @commands.command(name="queue", aliases=["q"], help="Displays the queue")
     async def queue(self, ctx):
@@ -236,9 +258,11 @@ class Song(commands.Cog):
     async def skip(self, ctx):
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            await ctx.message.channel.send("Skipped!")
+            embed = main.embed_func(ctx, "Skip", "The song has been skipped!")
+            await ctx.send(embed=embed)
         else:
-            await ctx.message.channel.send("The bot is not playing any music")
+            embed = main.embed_func(ctx, "Skip", "No music is currently playing!", discord.Color.red())
+            await ctx.send(embed=embed)
 
     @commands.command(name="seek", help="Seeks (in seconds) to a certain part of the song")
     async def seek(self, ctx, timestamp):
@@ -248,7 +272,8 @@ class Song(commands.Cog):
             ctx.voice_client.pause()
             self.paused = True
         if self.current == "":
-            await ctx.message.channel.send("No song is playing")
+            embed = main.embed_func(ctx, "Seek", "No music is currently playing!", discord.Color.red())
+            await ctx.send(embed=embed)
 
         # Then as whenever (in the original code, I've fixed it for just adding
         # stuff) a song is paused, you can start playing another one, it now
@@ -263,7 +288,8 @@ class Song(commands.Cog):
                     player, after=lambda e: print(f"Player error: {e}") if e else None
                 )
             self.paused = False
-            await ctx.send("Seeked to {}s".format(timestamp))
+            embed = main.embed_func(ctx, "Seek", f"Seeked to {timestamp}s")
+            await ctx.send(embed=embed)
 
     @commands.command(name="current", help="Displays the currently playing song")
     async def current(self, ctx):
@@ -271,17 +297,22 @@ class Song(commands.Cog):
             player = await YTDLSource.from_url(
                 self.current
             )
-            await ctx.send("Currently playing: {}".format(player.title))
+            embed = main.embed_func(ctx, "Current", f"Currently playing: {player.title}")
+            # print(player.url)
+            await ctx.send(embed=embed)
         else:
-            await ctx.send("No music is currently playing.")
+            embed = main.embed_func(ctx, "Current", "No music is currently playing!", discord.Color.red())
+            await ctx.send(embed=embed)
 
     @commands.command(name="remove", aliases=["r", "rm", "del", "delete"], help="Removes an item from the queue")
     async def remove(self, ctx, num):
 
         if int(num) > len(self.playlist):
-            await ctx.send("No item in queue with this value")
+            embed = main.embed_func(ctx, "Remove", "There is no item in the queue with this value!", discord.Color.red())
+            await ctx.send(embed=embed)
         else:
-            await ctx.send("Removed {} from the queue".format(self.pretty_playlist[int(num) - 1]))
+            embed = main.embed_func(ctx, "Remove", "Removed {} from the queue".format(self.pretty_playlist[int(num) - 1]))
+            await ctx.send(embed=embed)
             self.playlist.pop(int(num) - 1)
             self.pretty_playlist.pop(int(num) - 1)
 
@@ -289,13 +320,18 @@ class Song(commands.Cog):
     async def move(self, ctx, old, new):
 
         if int(old) > len(self.playlist):
-            await ctx.send("No item in queue with this value")
+            embed = main.embed_func(ctx, "Remove", "There is no item in the queue with this value!", discord.Color.red())
+            await ctx.send(embed=embed)
         elif int(new) > len(self.playlist):
-            await ctx.send("Please enter a number within the bounds of the queue")
+            embed = main.embed_func(ctx, "Move", "Please enter a new queue position within the bounds"
+                                                 " of the queue!", discord.Color.red())
+            await ctx.send(embed=embed)
         else:
             self.playlist.insert(int(new) - 1, self.playlist.pop(int(old) - 1))
             self.pretty_playlist.insert(int(new) - 1, self.pretty_playlist.pop(int(old) - 1))
-            await ctx.send("Moved {} to number {} in the queue".format(self.pretty_playlist[int(new) - 1], new))
+            embed = main.embed_func(ctx, "Move", "Moved {} to number {} in the "
+                                                 "queue".format(self.pretty_playlist[int(new) - 1], new))
+            await ctx.send(embed=embed)
 
 
 def setup(bot):
