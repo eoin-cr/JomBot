@@ -1,14 +1,15 @@
 # wordle.py
-import time
-import discord
 from discord.ext import commands, tasks
-import time
-from datetime import timedelta
-from numpy import loadtxt
 import random
 
+
 class Wordle(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self, bot):
+        self.guesses = None
+        self.message = None
+        self.word = None
+        self.words = None
+        self.user = None
         self.bot = bot
         self.loops = 0
         self.started = False
@@ -16,12 +17,13 @@ class Wordle(commands.Cog):
 
     # This task loop acts as a timer
     @tasks.loop(seconds=60)
-#     @tasks.loop(seconds=2)
+    #     @tasks.loop(seconds=2)
     async def timer(self, ctx):
         self.loops += 1
         # Here loops are the same as minutes
         if self.loops == 4:
-            await ctx.send("You only have one minute to make a guess before the game stops.  Use !time to extend this time")
+            await ctx.send("You only have one minute to make a guess before the game stops.  Use !extend to extend "
+                           "this time")
         elif self.loops == 5:
             await ctx.send("Timer ran out, game stopped.")
             # Changes game start and resets time and stops timer
@@ -81,7 +83,8 @@ class Wordle(commands.Cog):
                         # user has ran out of guesses
                         self.guesses += 1
                         if self.guesses >= 6:
-                            await ctx.send("Game over - You have run out of guesses!  The word was {}".format(self.word))
+                            await ctx.send("Game over - You have run out of guesses!  "
+                                           "The word was {}".format(self.word))
 
                             # Changes game state and stops timer
                             self.started = False
@@ -117,18 +120,14 @@ class Wordle(commands.Cog):
             self.words = text_file.read()
             self.words = self.words.split('\n')
 
-            # Counts number of words
-            count = 0
-            for word in self.words:
-                count += 1
-
-            index = random.randint(0,count)
+            count = len(self.words)
+            index = random.randint(0, count)
             self.word = self.words[index]
             self.message = ""
             self.guesses = 0
 
-    @commands.command(name="time", help="Extends your wordle time")
-    async def time(self, ctx):
+    @commands.command(name="extend", help="Extends your wordle time")
+    async def extend(self, ctx):
         # Checks if the person requesting more time is the player
         if ctx.message.author == self.user:
             self.loops = 0
@@ -147,7 +146,7 @@ class Wordle(commands.Cog):
             self.started = False
             await ctx.send("Stopped game")
         else:
-            await ctx.send("You cannot stop someone elses game!")
+            await ctx.send("You cannot stop someone else's game!")
 
 
 def setup(bot):
