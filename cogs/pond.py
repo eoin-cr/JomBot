@@ -1,24 +1,19 @@
 # pond.py
-import os
-import re
 import discord
-import requests
 from discord.ext import commands
-import json
-from discord.utils import find
 import random
-from numpy import loadtxt
 import asyncio
 
+
 class Pond(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
         print("Pond initialised")
 
     # Code from when groovy was still a thing and would announce whenever
     # it dced from the vc
     @commands.Cog.listener()
-    async def on_message(self,ctx):
+    async def on_message(self, ctx):
         if ctx.author.id == 234395307759108106:
             voice_state = ctx.member.voice
             await asyncio.sleep(5)
@@ -29,9 +24,8 @@ class Pond(commands.Cog):
                 await ctx.send('Shut the fuck up groovy')
                 return await ctx.remove
 
-
     @commands.Cog.listener()
-    async def on_message(self,message):
+    async def on_message(self, message):
         if message.guild is not None and message.guild.id == 829349685667430460:
             # Checks if a message was sent in the introductions channel
             if message.channel.id == 830565670805962822:
@@ -54,10 +48,10 @@ class Pond(commands.Cog):
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")
 
-
             # Doesn't work as a command as it would need a prefix which is cringe
             # Checks if in right server, and if perms are correct
-            if message.content.startswith("🦶") and len(message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
+            if message.content.startswith("🦶") and len(
+                    message.content.split(' ')) == 2 and message.author.guild_permissions.kick_members:
                 # Splits message content
                 cont = message.content.split(' ')
 
@@ -78,7 +72,8 @@ class Pond(commands.Cog):
     @commands.command(name="Q", help="Formats Jom's questions")
     async def Q(self, ctx, *, cont):
         # Checks if I sent the message and if it's in the right server
-        if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and ctx.message.guild.id == 829349685667430460:
+        if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and \
+                ctx.message.guild.id == 829349685667430460:
             # Splits message at newlines
             split = cont.split('\n')
 
@@ -90,51 +85,52 @@ class Pond(commands.Cog):
                     split[i] = f"- {split[i]}"
 
             # Sets question channel
-            qsChannel = message.guild.get_channel(834198286310047784)
-#             qsChannel = ctx.message.guild.get_channel(829358413065486376)
+            qs_channel = message.guild.get_channel(834198286310047784)
+            #             qs_channel = ctx.message.guild.get_channel(829358413065486376)
 
             # Undoes the earlier newline split and sends message
             joined = '\n'.join(split)
             full_message = str(f"```yaml\n{joined} \n```")
-            return await qsChannel.send(full_message)
+            return await qs_channel.send(full_message)
 
     @commands.command(name="jomwheel", help="Spins the jomwheel")
-    async def jomwheel(self,message,ctx, *arg):
-        if arg == ('s',):
+    async def jomwheel(self, message, *arg):
+        if arg[1] == 's':
             # Opens file, picks a random num, and selects that voice line
             with open("wheel_speak.txt", "r") as file:
                 lines = file.readlines()
-                for l in lines:
-                    wheel_speak = l.split(", ")
-            num = random.randint(0,6)
+                for line in lines:
+                    wheel_speak = line.split(", ")
+            num = random.randint(0, 6)
             await message.channel.send("*clickclickclickclick1*")
             return await message.channel.send(wheel_speak[num])
         else:
             with open("wheel.txt", "r") as file:
                 lines = file.readlines()
-                for l in lines:
-                    wheel = l.split(", ")
-            num = random.randint(0,6)
+                for line in lines:
+                    wheel = line.split(", ")
+            num = random.randint(0, 6)
             await message.channel.send("*clickclickclickclick*")
             return await message.channel.send(wheel[num])
 
     @commands.command(name="reply", help="Replies to your message")
-    async def reply(self,ctx):
+    async def reply(self, ctx):
         return await ctx.reply('Hello')
 
     # Prints a message to the terminal - handy for getting emoji ids and the like
     @commands.command()
-    async def print(self,ctx,*message):
-        str = ' '.join(message)
-        print(str)
-#         return print(message)
+    async def print(self, *message):
+        string = ' '.join(message)
+        print(string)
+
+    #         return print(message)
 
     @commands.command(name="short", help="ha")
-    async def short(self,ctx):
+    async def short(self, ctx):
         return await ctx.send("Ha lark is short")
 
     @commands.command(name="introduce", help="Introduces someone")
-    async def introduce(self,ctx):
+    async def introduce(self, ctx):
         return await ctx.send("""Hey there and welcome to the server!
 Be sure to answer the questions in <#830565670805962822> and then check
 out <#830565732001644555> and <#830565778654887958> for more information!
@@ -142,26 +138,27 @@ Also when enabled I will delete every message containing sus, vented, etc.
 So if your messages are getting removed, that might be why""")
 
     @commands.command(name="test", help="Sends a test embed")
-    async def test(self,message):
-        embed=discord.Embed(title="testing", url="https://google.com", description="test", color=discord.Color.blue())
+    async def test(self, message):
+        embed = discord.Embed(title="testing", url="https://google.com", description="test", color=discord.Color.blue())
         embed.set_author(name=message.author.display_name, url="https://bing.com", icon_url=message.author.avatar_url)
         embed.add_field(name="field 2", value="testing 2", inline=False)
         embed.set_footer(text="Test")
-        embed.set_thumbnail(url="https://3.bp.blogspot.com/-vdcxPhqYdWM/UTSJzMfhUlI/AAAAAAAACyU/Vp5x5zqjf84/s1600/smiley-facess.jpg")
+        embed.set_thumbnail(
+            url="https://3.bp.blogspot.com/-vdcxPhqYdWM/UTSJzMfhUlI/AAAAAAAACyU/Vp5x5zqjf84/s1600/smiley-facess.jpg")
         await message.channel.send(embed=embed)
         return
 
     # Lists invites, used it for debugging something before
     @commands.command()
-    async def ls(self,ctx,message):
+    async def ls(self, ctx, message):
         if message == "invites":
             invite_list = await ctx.guild.invites()
-            for i in range (0, len(invite_list)):
+            for i in range(0, len(invite_list)):
                 print(invite_list[i].uses)
 
     # Secret command that doesn't do anything at all :)
     @commands.command(name="send")
-    async def send(self,ctx, *message):
+    async def send(self, ctx, *message):
         # Checks channel id
         if ctx.channel.id == 824766240589086761:
             # Gets specific channel
@@ -173,23 +170,21 @@ So if your messages are getting removed, that might be why""")
             # Sends message to channel
             await general.send(message)
 
-
     @commands.command(name="alias", help="alias")
-    async def alias(self,message):
-        #open text file in read mode
+    async def alias(self, message):
+        # open text file in read mode
         text_file = open("words.txt", "r")
-          #read whole file to a string
+        # read whole file to a string
         words = text_file.read()
 
         # Picks a random sentence length from 3 to 10 words.
-        loopNum = random.randint(3,10)
+        loop_num = random.randint(3, 10)
         sentence = ""
-        Mauth = str(message.author)
         if words is not None:
             words = words.split('\n')
-            for x in range(loopNum):
+            for x in range(loop_num):
                 # Randomly selects a word and adds it to the sentence
-                index = random.randint(0,466452)
+                index = random.randint(0, 466452)
                 sentence = sentence + words[index] + " "
             # Sends message
             await message.channel.send(sentence)
@@ -198,6 +193,7 @@ So if your messages are getting removed, that might be why""")
             response = "Uh oh there's been a fucky wucky"
             await message.channel.send(response)
             return
+
 
 def setup(bot):
     bot.add_cog(Pond(bot))

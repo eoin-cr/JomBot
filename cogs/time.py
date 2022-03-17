@@ -1,23 +1,21 @@
 # time.py
-import os
-import discord
 from discord.ext import commands
-from numpy import loadtxt
 from datetime import datetime
+
 
 # TODO: use better file stuff than just a txt file - json file perhaps
 
 class Time(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
         print("Time initialised")
 
     @commands.command(name="time", help="Displays current time in certain timezones")
-    async def time(self,message,area):
+    async def time(self, message, area):
         now = datetime.now()
         area = area.lower()
         if area == "us" or area == "america":
-            hour  = int(now.strftime("%H")) - 8
+            hour = int(now.strftime("%H")) - 8
             if hour < 0:
                 hour += 24
             time = "" + str(hour) + ":" + str(now.strftime("%M:%S"))
@@ -42,14 +40,14 @@ class Time(commands.Cog):
             await message.channel.send(time)
 
         else:
-#             print(area)
+            # print(area)
             area = int(area.strip('@,<>,!,()'))
-#             print(area)
+            # print(area)
             with open('timezones.txt') as f:
-#                 data = f.read()
+                # data = f.read()
 
-#                 print(f'data: {data}')
-#                 print(f'data1: {data[1]}')
+                # print(f'data: {data}')
+                # print(f'data1: {data[1]}')
                 for line in f:
                     print(f'line: {line}')
                     line = line.split(" ")
@@ -67,9 +65,9 @@ class Time(commands.Cog):
 
                 await message.channel.send("No timezone found for that user")
 
-
-    @commands.command(name="set-time", aliases=["set time", "set_time", "time-set"], help="Sets your timezone (use UTC+/-X)")
-    async def settime(self, message, zone, *user):
+    @commands.command(name="set-time", aliases=["set time", "time-set"],
+                      help="Sets your timezone (use UTC+/-X)")
+    async def set_time(self, message, zone, *user):
         if user is None:
             user = message.author.id
             print("NONE!")
@@ -87,6 +85,7 @@ class Time(commands.Cog):
         with open('timezones.txt', 'a') as f:
             f.write(f'\n{user} {zone}')
         await message.channel.send("Timezone set!")
+
 
 def setup(bot):
     bot.add_cog(Time(bot))

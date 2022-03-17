@@ -1,74 +1,66 @@
 # bot.py
 import os
-import random
-import time
-import re
 import discord
-import requests
 from dotenv import load_dotenv
 from discord.ext import commands
-from discord.ext.commands import has_permissions
-from bs4 import BeautifulSoup
-import cryptocompare
-import json
-from discord.utils import find
 
 intents = discord.Intents.default()
 intents.members = True
-
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 # The prefix is either ! or a little chicken emoji.  How fun :)
-bot = commands.Bot(command_prefix=["!",'<:chigmn2:829382748631203901> '])
+bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> '])
 
-@bot.event
-async def on_member_join(member):
-    # This code automatically invites someone to the server.  It was made
-    # redundant with the introduction of requiring filling out introduction qs
-    # await channel.send("""Hello {} and welcome to the server!  A lot of people \
-    # seem to join and then just never say anything so please don\'t do that thanks.  \
-    # Anyway be sure to answer the questions in <#830565670805962822> and then check \
-    # out <#830565732001644555> and <#830565778654887958> for more information!  \
-    # Also when enabled I will delete every message containing sus, vented, etc.  \
-    # So if your messages are getting removed, that might be why""".format(member.name))
 
-    # Gets general channel invites
-    channel = client.get_channel(829349688197120052)
-    invite_list = await member.guild.invites()
-
-    secret = client.get_channel(850459809324597288)
-    # print(invite_list[2].uses)
-    for i in range(0, len(invite_list)):
-        # for x in invite_list:
-        num_list = []
-        # invite =
-        # with is like your try .. finally block in this case
-        with open('invites.txt', 'r') as file:
-        # read a list of lines into data
-            data = file.readlines()
-
-        # checks if a new invite has been made, and sends message to the secret
-        # channel
-        if invite_list[i].uses is not data[i]:
-            await secret.send("{} was invited to the server by {}".format(member.name, invite_list[i].inviter))
-            data[i] = invite_list[i].uses
-            break
-
-    # updates invites list
-    invites_list = await member.guild.invites()
-    list = []
-    for i in range (0, len(invites_list)):
-        # print(invites_list[i].uses)
-        list.append(invites_list[i].uses)
-    with open('invites.txt', 'w') as file:
-        file.write('\n'.join([str(x) for x in list]))
+# Code that checked who sent an invite link whenever someone new joins
+# @bot.event
+# async def on_member_join(member):
+#     # This code automatically invites someone to the server.  It was made
+#     # redundant with the introduction of requiring filling out introduction qs
+#     # await channel.send("""Hello {} and welcome to the server!  A lot of people \
+#     # seem to join and then just never say anything so please don\'t do that thanks.  \
+#     # Anyway be sure to answer the questions in <#830565670805962822> and then check \
+#     # out <#830565732001644555> and <#830565778654887958> for more information!  \
+#     # Also when enabled I will delete every message containing sus, vented, etc.  \
+#     # So if your messages are getting removed, that might be why""".format(member.name))
+#
+#     # Gets general channel invites
+#     channel = client.get_channel(829349688197120052)
+#     invite_list = await member.guild.invites()
+#
+#     secret = client.get_channel(850459809324597288)
+#     # print(invite_list[2].uses)
+#     for i in range(0, len(invite_list)):
+#         # for x in invite_list:
+#         num_list = []
+#         # invite =
+#         # with is like your try .. finally block in this case
+#         with open('invites.txt', 'r') as file:
+#         # read a list of lines into data
+#             data = file.readlines()
+#
+#         # checks if a new invite has been made, and sends message to the secret
+#         # channel
+#         if invite_list[i].uses is not data[i]:
+#             await secret.send("{} was invited to the server by {}".format(member.name, invite_list[i].inviter))
+#             data[i] = invite_list[i].uses
+#             break
+#
+#     # updates invites list
+#     invites_list = await member.guild.invites()
+#     list = []
+#     for i in range (0, len(invites_list)):
+#         # print(invites_list[i].uses)
+#         list.append(invites_list[i].uses)
+#     with open('invites.txt', 'w') as file:
+#         file.write('\n'.join([str(x) for x in list]))
 
 # @bot.event
 # async def on_message(message):
 
-    # Legacy code for debugging invites checker
+# Legacy code for debugging invites checker
 #     if message.content == "inv_txt":
 #         invites_list = await message.guild.invites()
 #         list = []
@@ -90,8 +82,9 @@ async def on_member_join(member):
 
 @bot.command()
 async def hello(ctx):
-    hello = "Hello!"
-    await ctx.send(hello)
+    hi = "Hello!"
+    await ctx.send(hi)
+
 
 # Loads certain cogs stored in the cogs directory
 bot.load_extension("cogs.crypto")
