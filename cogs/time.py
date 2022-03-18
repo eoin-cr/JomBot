@@ -91,10 +91,10 @@ class Time(commands.Cog):
 
     @commands.command(name="set-time", aliases=["set time", "time-set"],
                       brief="Sets a user's timezone (use UTC+/-X)", help="!set-time [user (leave empty to "
-                      "change your own time)] [UTC+/-X]")
-    async def set_time(self, message, zone, *user):
+                                                                         "change your own time)] [UTC+/-X]")
+    async def set_time(self, ctx, zone, *user):
         if len(user) == 0:
-            user = message.author.id
+            user = ctx.author.id
             # print("NONE!")
         else:
             # Converts a tagged user string into a user id
@@ -111,9 +111,9 @@ class Time(commands.Cog):
 
         # Makes sure the timezone is a valid one
         if int(zone) < -12 or int(zone) > 12:
-            embed = main.embed_func(message, "Set time", "Invalid timezone!  Set a time in the "
-                                                         "format UTC+/-X.", discord.Color.red())
-            return await message.channel.send(embed=embed)
+            embed = main.embed_func(ctx, "Set time", "Invalid timezone!  Set a time in the "
+                                                     "format UTC+/-X.", discord.Color.red())
+            return await ctx.send(embed=embed)
 
         # If timezones.json does not exist, create it
         if not os.path.exists("timezones.json"):
@@ -131,9 +131,14 @@ class Time(commands.Cog):
         with open("timezones.json", "w") as f:
             json.dump(data, f)
 
-        memb = await message.guild.fetch_member(user)
-        embed = main.embed_func(message, "Set time", f"{memb.mention}'s timezone has been set as UTC{zone}!")
-        await message.channel.send(embed=embed)
+        memb = await ctx.guild.fetch_member(user)
+        embed = discord.Embed(color=discord.Color.blue())
+        embed.add_field(name="Set time", value=f"{memb.mention}'s timezone has been set as UTC{zone}!")
+        embed.set_author(name=memb.display_name, icon_url=memb.avatar_url)
+        return await ctx.send(embed=embed)
+        # memb = await message.guild.fetch_member(user)
+        # embed = main.embed_func(message, "Set time", f"{memb.mention}'s timezone has been set as UTC{zone}!")
+        # await message.channel.send(embed=embed)
 
 
 def setup(bot):
