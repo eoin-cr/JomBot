@@ -75,12 +75,9 @@ class Crypto(commands.Cog):
         # Creates and sends a help embed
         embed = discord.Embed(title="Help", color=discord.Color.blue())
         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-        embed.add_field(name="Commands", value="""Ban/Allow the among us words \
-        (sus, vented, etc) [allowed by default - enabling may result in messages \
-        with legitimate words containing words like sus getting removed.] - `!1984 \
-        start/stop` [must have manage server perms] \n Buy crypto - `!cbuy [coin] \
-        [price in usd/all]` \n Sell crypto - `!csell [coin] [price in usd/all]` \
-        \n Price of a coin - `!price [coin]` \n View wallet - `!wallet`""")
+        embed.add_field(name="Commands", value="Buy crypto - `!cbuy [coin] " 
+                                               "[price in usd/all]` \n Sell crypto - `!csell [coin] [price in usd/all]`"
+                                               "\n Price of a coin - `!price [coin]` \n View wallet - `!wallet`")
         await message.channel.send(embed=embed)
 
     @commands.command(name="cbuy", help="Buys a certain crypto")
