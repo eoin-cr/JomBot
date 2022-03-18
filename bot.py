@@ -42,8 +42,9 @@ bot.load_extension("cogs.ip")
 bot.load_extension("cogs.song")
 bot.load_extension("cogs.wordle")
 bot.load_extension("cogs.time")
-bot.load_extension("cogs.error")
-#bot.load_extension("cogs.embed_test")
+# bot.load_extension("cogs.error")
+# bot.load_extension("cogs.embed_test")
+bot.load_extension("cogs.hh")
 
 # Runs the bot using a .env stored bot token
 bot.run(TOKEN)
