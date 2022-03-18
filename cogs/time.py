@@ -18,12 +18,16 @@ class Time(commands.Cog):
     async def time(self, ctx, area):
         now = datetime.now()
         area = area.lower()
+        # This timezone (and the canadian one) was based off of a specific user in
+        # the server, so I've added the server check to reduce confusion in other
+        # servers
         if area == "us" or area == "america":
-            hour = int(now.strftime("%H")) - 8
-            if hour < 0:
-                hour += 24
-            time = "" + str(hour) + ":" + str(now.strftime("%M:%S"))
-            await ctx.send(time)
+            if ctx.guild.id == 829349685667430460:
+                hour = int(now.strftime("%H")) - 8
+                if hour < 0:
+                    hour += 24
+                time = "" + str(hour) + ":" + str(now.strftime("%M:%S"))
+                await ctx.send(time)
 
         elif area == "uk" or area == "england" or area == "ireland":
             time = str(now.strftime("%H:%M:%S"))
@@ -37,11 +41,12 @@ class Time(commands.Cog):
             await ctx.send(time)
 
         elif area == "canada":
-            hour = int(now.strftime("%H")) - 5
-            if hour < 0:
-                hour += 24
-            time = "" + str(hour) + str(now.strftime(":%M:%S"))
-            await ctx.send(time)
+            if ctx.guild.id == 829349685667430460:
+                hour = int(now.strftime("%H")) - 5
+                if hour < 0:
+                    hour += 24
+                time = "" + str(hour) + str(now.strftime(":%M:%S"))
+                await ctx.send(time)
 
         else:
             # print(area)
