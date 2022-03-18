@@ -86,14 +86,14 @@ class Time(commands.Cog):
                 embed = discord.Embed(color=discord.Color.blue())
                 embed.add_field(name="Time", value=f"The time for {memb.mention} is {time}", inline=False)
                 embed.set_author(name=memb.display_name, icon_url=memb.avatar_url)
-                print("hello")
                 return await ctx.send(embed=embed)
                 # return await message.channel.send(time)
 
     @commands.command(name="set-time", aliases=["set time", "time-set"],
-                      help="Sets a user's timezone (use UTC+/-X)")
+                      brief="Sets a user's timezone (use UTC+/-X)", help="!set-time [user (leave empty to "
+                      "change your own time)] [UTC+/-X]")
     async def set_time(self, message, zone, *user):
-        if user is None:
+        if len(user) == 0:
             user = message.author.id
             # print("NONE!")
         else:
