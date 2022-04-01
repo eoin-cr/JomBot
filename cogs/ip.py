@@ -1,42 +1,52 @@
 # IP.py
-import os
-import asyncio
-import time
-import discord
-from discord.ext import commands
-from dotenv import load_dotenv
+from discord.ext import commands, tasks
 import subprocess
-import time
-from timeloop import Timeloop
-from datetime import timedelta
+
 
 class IP(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
         print("IP initialised")
+        self.old_ip = ""
 
-    @commands.command()
-    async def sendIP(self,message):
-#         print("hello")
-#         print(message.guild.id)
+    # Creates a task loop that runs every 60 seconds to check if the IP
+    # has changed
+    @tasks.loop(seconds=60)
+    async def check_ip(self, message):
+        # Gets the IP
+        result = subprocess.run(['curl', 'ifconfig.co'], stdout=subprocess.PIPE)
+        ip_address = str(result).split(' ')
+
+        # Strips other information
+        ip_address = ip_address[3]
+        ip_address = ip_address[9:-4]
+
+        # Checks if IP has changed, and if so sends a message and updates
+        # the old IP value
+        if ip_address != self.old_ip:
+            await message.channel.send(f'Your IP changed!  It is now {ip_address}')
+            self.old_ip = ip_address
+
+    # Command to display IP
+    @commands.command(hidden=True)
+    async def send_ip(self, message):
+        # Checks if it was requested in my own server
         if message.guild.id == 786732353098743930:
-#             print("IP sending")
+            # Gets the IP
             result = subprocess.run(['curl', 'ifconfig.co'], stdout=subprocess.PIPE)
-            IP = str(result).split(' ')
-            IP3 = IP[3]
-            IP3 = IP3[9:-4]
-            return await message.channel.send(IP3)
-            
-#     tl = Timeloop()
+            ip_address = str(result).split(' ')
 
-#     @tl.job(interval=timedelta(seconds=3600)
-#     async def ip_check():
-#         result = subprocess.run(['curl', 'ifconfig.co'], stdout=subprocess.PIPE)
-#         IP = str(result).split(' ')
-#         IP3 = IP[3]
-#         IP3 = IP3[9:-4]
-            
+            # Strips other stuff
+            ip_address = ip_address[3]
+            ip_address = ip_address[9:-4]
+
+            # Only tries start the loop if it's not already running to prevent
+            # issues
+            self.old_ip = ip_address
+            if not self.check_ip.is_running():
+                self.check_ip.start(message)
+            return await message.channel.send(ip_address)
+
+
 def setup(bot):
     bot.add_cog(IP(bot))
-       
-       
