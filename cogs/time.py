@@ -136,9 +136,6 @@ class Time(commands.Cog):
         embed.add_field(name="Set time", value=f"{memb.mention}'s timezone has been set as UTC{zone}!")
         embed.set_author(name=memb.display_name, icon_url=memb.avatar_url)
         return await ctx.send(embed=embed)
-        # memb = await message.guild.fetch_member(user)
-        # embed = main.embed_func(message, "Set time", f"{memb.mention}'s timezone has been set as UTC{zone}!")
-        # await message.channel.send(embed=embed)
 
 
 def setup(bot):

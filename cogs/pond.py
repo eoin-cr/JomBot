@@ -9,12 +9,14 @@ import bot as main
 def pond_check():
     def predicate(ctx):
         return ctx.guild.id == 829349685667430460
+
     return commands.check(predicate)
 
 
 class Pond(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.invites_disabled = False
         print("Pond initialised")
 
     @commands.command(name="hi")
@@ -33,7 +35,7 @@ class Pond(commands.Cog):
         if message.guild is not None and message.guild.id == 829349685667430460:
             # Checks if a message was sent in the introductions channel
             # if message.channel.id == 829358413065486376:
-            if message.channel.id == 830565670805962822:
+            if message.channel.id == 830565670805962822 and not self.invites_disabled:
                 role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
                 role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
                 role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
@@ -212,6 +214,26 @@ So if your messages are getting removed, that might be why""")
             response = "Uh oh there's been a fucky wucky"
             await message.channel.send(response)
             return
+
+    @commands.command(name="disable-introductions", alias="disable_introductions",
+                      help="Disables functionality that lets people"
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def disable_introductions(self, ctx):
+        embed = main.embed_func(ctx, "Locked down", "Messages sent in introductions will now"
+                                                    " no longer let the user speak in general.")
+        self.invites_disabled = True
+        await ctx.send(embed=embed)
+
+    @commands.command(name="enable-introductions", alias="enable_introductions",
+                      help="Enables functionality that lets people"
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def enable_introductions(self, ctx):
+        embed = main.embed_func(ctx, "Lock down lifted", "Messages sent in introductions will now"
+                                                         " let the user speak in general.")
+        self.invites_disabled = False
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

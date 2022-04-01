@@ -20,6 +20,17 @@ Default prefix: `!`
 
 ---
 
+## Added in this commit:
+For one of the servers this bot is on, the way permissions are handled is that a user
+is required to fill out some questions in an introductions channel before being granted
+speaking perms with a role.  In this commit I have added a function which—upon being used—
+disables the 
+function which grants the role required for speaking perms, essentially acting as a basic
+way to lock down all the channels (except the introduction one obviously) from new people
+trying to raid the server or the like.
+
+---
+
 ## Self-hosting JomBot
 [Article on creating a bot token](https://www.writebots.com/discord-bot-token/)
 

@@ -1,9 +1,10 @@
-#join.py
+# join.py
 import os
 import re
 import discord
 import requests
 from discord.ext import commands
+
 
 # Most of this code isn't used anymore, however you want it you may? be able
 # to uncomment most of it?  I can't quite remember how well this code works
