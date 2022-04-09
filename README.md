@@ -6,7 +6,7 @@ Does stuff and things.
 
 ---
 
-## Features:
+# Features:
 * Can set role upon new user messaging a selected channel (and then welcome them
 to the server)
 * Music player with queue and seek functionality
@@ -20,18 +20,12 @@ Default prefix: `!`
 
 ---
 
-## Added in this commit:
-For one of the servers this bot is on, the way permissions are handled is that a user
-is required to fill out some questions in an introductions channel before being granted
-speaking perms with a role.  In this commit I have added a function which—upon being used—
-disables the 
-function which grants the role required for speaking perms, essentially acting as a basic
-way to lock down all the channels (except the introduction one obviously) from new people
-trying to raid the server or the like.
+# Added in this commit:
+Updated documentation
 
 ---
 
-## Self-hosting JomBot
+# Self-hosting JomBot
 [Article on creating a bot token](https://www.writebots.com/discord-bot-token/)
 
 Once you have your token, download the JomBot repo and unzip it.  Create a file called just
@@ -53,6 +47,8 @@ commands that will only run on certain servers.  Change the id the command looks
 code to the id of your server/channel.
 
 ---
+
+# Building your own bot
 
 [Discord.py documentation](https://discordpy.readthedocs.io/en/stable/)
 
@@ -105,3 +101,205 @@ You can also add more checks to functions.  For example:
 once every 5 seconds, and the user must have manage_messages perms, and the message must be sent
 in the pond.  Take a look at the docs if you want some more examples.  Also note that every function
 must by `async`ed and then messages must be `await`ed. 
+
+---
+
+# Commands list
+All required values will be in square brackets, any optional values will be in round brackets.
+Any commands that will not run if you invite the bot to your server will be indicated with an
+asterisks in front of the prefix.
+### Crypto
+The crypto cog was built after someone who was interested in crypto asked for a crypto simulator
+they could use to practice.  This cog uses real time current and historic data from the cryptocompare
+API.  JomBot will store your coins in a personal wallet.
+```
+!price [coin]
+```
+* Displays information about the price of a certain coin
+
+```
+!chelp
+```
+* Displays a little help embed
+```
+!cbuy [coin] [amount/all]
+```
+* Buys a certain amount of a coin with USD
+```
+!csell [coin] [amount/all]
+```
+* Sells a certain amount of a coin for USD
+```
+!wallet (user)
+```
+* Displays the wallet of a user, if left blank will display your own wallet
+
+---
+
+### HH
+This cog was custom built for a certain server.  It tracks the amount of messages each user sends
+and gives a regular role if a user sends more than a certain amount of messages each week.  Although
+this will not be enabled on any servers JomBot is added to by default, if you are self-hosting you
+can remove the server check.  This cog has no usable commands.
+
+### IP
+This cog provides an easy way to get the IP of the device you are hosting the bot on.  This can be
+helpful if you are self-hosting on a server has a dynamic IP, which is on a different network than
+you are currently on.  Obviously this command will only work for me, but if you are self hosting
+the bot you'll be able to change which users are able to call the command.
+
+```python
+*!send_ip
+```
+* sends the current IP of the server hosting the bot
+
+---
+
+### Pond
+This cog is custom build for a different server.  However, quite a few of the commands will run
+universally.
+```python
+!manage_messages_check
+```
+* Check which will tell you if you have manage message perms on a server
+```python
+*🦶 [user]
+```
+* Kicks a user
+```python
+*!jomwheel spin (s)
+```
+* Imitates a user by printing a message from a list of messages
+```python
+!reply
+```
+* Replies to your message.  Good way of just checking if the bot is working.
+```python
+*!introduce
+```
+* Prints an introduction message to welcome someone who joined and give them a little information
+about the server
+```python
+!test
+```
+* Sends a test embed
+```python
+*!alias
+```
+* Sends a random list of words to imitate a user
+```python
+*!disable_introductions/disable-introductions
+```
+* On the server this was created for, a user cannot speak unless they send a message in an
+introductory channel first.  Upon sending a message there a speaking role is automatically
+granted.  This command turns off the function which automatically grants a speaking role upon
+sending a message in the introduction channel to prevent raids and the like
+```python
+*!enable_introductions/enable-introductions
+```
+* Enables the functionality that automatically grants speaking perms upon messaging the intro
+channel
+
+---
+
+### Song
+This cog is a youtube music player.
+```python
+!join/j
+```
+* Joins the voice channel you are currently in
+```python
+!leave/dc
+```
+* Leaves the voice channel you are currently in
+```python
+!play/p [title/youtube url]
+```
+* Adds a song to the queue
+```python
+!pause
+```
+* Pauses the song
+```python
+!resume
+```
+* Resumes the song
+```python
+!queue/q
+```
+* Displays the queue
+```python
+!raw_queue
+```
+* Displays the raw queue (only useful for debugging)
+```python
+!skip
+```
+* Skips the currently playing song
+```python
+!seek [time in seconds]
+```
+* Seeks to a certain part of the currently playing song
+```python
+!current
+```
+* Displays the name of the currently playing song
+```python
+!remove/r/rm/del/delete [number in queue]
+```
+* Removes a song from the queue
+```python
+!move/m/mv [old position in queue] [new position in queue]
+```
+* Moves a song in the queue
+
+---
+
+### Time
+Cog which keeps track of people's timezones.  The option display certain countries timezones
+will not be accurate for everyone, as for example the `!time US` command is just for `UTC-8`,
+because that's the only one needed on my server.  However, the option to set certain user's
+timezones should always be accurate (apart from when the user goes into daylight savings time.
+The server I'm hosting it on is at UTC+0 and is not affected by DST).  Remember, if you are self
+hosting, you will have to change the time the server thinks you're at, as the code assumes you're
+hosting from UTC+0
+```python
+!time [us/america/uk/england/ireland/serbia/canada]
+```
+* Displays some times in certain timezones in certain countries
+```python
+!time [user]
+```
+* Displays the time it currently is for a certain user
+```python
+!set-time (user) [UTC+/-X]
+```
+* Sets the timezone of a user or yourself.
+
+### Wordle
+Wordle is a word game where you have to guess a certain 5 letter word.  If a letter is not in
+the answer it will show up grey, if it is in the answer but in a different position it will show
+up yellow, and if it is in the answer in the correct position it will show up green. You can play
+the original game [here](https://www.nytimes.com/games/wordle/index.html).  You can also play
+wordles with JomBot.
+```python
+!wordle start
+```
+* Starts a wordle game (NOTE: Only one person can play at a time to avoid confusion)
+```python
+!wordle [guess]
+```
+* Guesses a word
+```python
+!extend
+```
+* There is a time limit imposed so a user doesn't start a game and never finish it, blocking
+it for everyone else.  However, if you are halfway through a game and still thinking when the bot
+tells you your time is running low, you can simply do this command to extend your time
+```python
+!quit
+```
+* Quits your current wordle game
+
+
+
