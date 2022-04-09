@@ -15,14 +15,22 @@ to the server)
 * Can tell you the IP of the server it's hosted on and let you know when it changes
   (useful if you're self hosting and don't have a static domain)
 * Crypto trading simulator using real time prices from the cryptocompare API
+* Added implementation of MEE6 level system
 
 Default prefix: `!`
 
 ---
 
 # Added in this commit:
-Added stuff for UCD Netsoc server, including welcome and leave messages, as
-well as a leveling system.
+The foundation of functionality of having a per-server music queue.  At the moment,
+one queue is saved and used between all servers, meaning, what plays next could
+be music someone you don't even know started playing.  Obviously this becomes an
+issue when multiple servers are playing music at the same time.  To combat that I
+am trying to make a namedtuple which contains a raw and pretty playlist for each
+server, as well as the current song, and the id of the server this is all for,
+obviously.  At the moment there are issues with queues transferring between different
+servers, so the different server tuples don't seem to be properly segregated.  I
+will work on fixing this tomorrow.
 
 ---
 
