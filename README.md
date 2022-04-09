@@ -21,7 +21,8 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Updated documentation
+Added stuff for UCD Netsoc server, including welcome and leave messages, as
+well as a leveling system.
 
 ---
 

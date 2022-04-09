@@ -11,7 +11,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 # The prefix is either ! or a little chicken emoji.  How fun :)
-bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> '])
+bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> '], intents=intents)
 
 
 def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
@@ -44,7 +44,8 @@ bot.load_extension("cogs.wordle")
 bot.load_extension("cogs.time")
 # bot.load_extension("cogs.error")
 # bot.load_extension("cogs.embed_test")
-bot.load_extension("cogs.hh")
+# bot.load_extension("cogs.hh")
+bot.load_extension("cogs.netsoc")
 
 # Runs the bot using a .env stored bot token
 bot.run(TOKEN)
