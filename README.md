@@ -22,8 +22,7 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Queue loop has been changed so it checks all servers currently playing, therefore making the
-skip function work.
+Commented code
 
 ---
 

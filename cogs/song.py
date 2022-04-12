@@ -27,6 +27,18 @@ ytdl_format_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+# How this cog works: Basically what happens is we have a `servers` array containing
+# namedTuples (a form of structure).  Each namedTuple stores the guild id,
+# pretty playlist, raw playlist, current song playing, whether the song has
+# been paused, and ctx.  This means that each server that calls JomBot for
+# music will have its own playlist, rather than having one shared playlist
+# between all servers using JomBot.  Then we have a task loop which runs once
+# per second. This loop goes through every element of the servers array and
+# checks if a song is currently playing, and if not it plays the next item
+# in the queue.  This is also the reason we need the ctx item in the tuple,
+# as this task loop is simply running every second, rather than being directly
+# called, and it accounts for every server, it needs to know where to send
+# messages stating that it's playing the next song and the like.
 
 # Note on the pretty_playlist and playlist: The playlist is the one the bot uses
 # to select the next song in the queue.  However, the pretty_playlist is
@@ -92,28 +104,26 @@ async def queue_func(ctx, playlist):
 class Song(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.paused = False
-        self.playlist = []
-        self.pretty_playlist = []
-        self.current = ""
-        self.Queue = namedtuple('Queue', ['id', 'pretty', 'raw', 'current', 'paused', 'guild', 'ctx'])
+        self.Queue = namedtuple('Queue', ['id', 'pretty', 'raw', 'current', 'paused', 'ctx'])
         self.servers = []
-        #         self.audio_player_task.start(ctx.guild)
         print("Song initialised")
 
-    # def cog_unload(self):
-    #     self.audio_player_task.cancel()
-    #
+    # Returns the index of the of the array element in the servers array which contains
+    # the id that matches the guild id of a message
     def return_index(self, guild_id, ctx):
         for i in range(len(self.servers)):
             # print(f'servers[{i}].id = {self.servers[i].id} guild_id: {guild_id}')
             if self.servers[i].id == guild_id:
+                # if a server with the needed id is found, then replace the ctx with
+                # the ctx of the last message, and return the index of that element
                 self.servers[i] = self.servers[i]._replace(ctx=ctx)
                 return i
 
         # print(len(self.servers))
+        # otherwise, if there's no element for that server, create one and return the
+        # new length of the servers array - 1
         self.servers.append(
-            self.Queue(id=guild_id, pretty=[], raw=[], current=None, paused=False, guild=None, ctx=ctx))
+            self.Queue(id=guild_id, pretty=[], raw=[], current=None, paused=False, ctx=ctx))
         return len(self.servers) - 1
 
     async def join_func(self, ctx):
@@ -134,6 +144,8 @@ class Song(commands.Cog):
     @tasks.loop(seconds=1.0)
     # async def audio_player_task(self, guild, ctx):
     async def audio_player_task(self):
+        # for each server "structure" in the array, check if music is currently playing,
+        # and if not, then play the next song in the queue
         for i in range(len(self.servers)):
             guild_id = self.servers[i].id
             ctx = self.servers[i].ctx
@@ -265,7 +277,8 @@ class Song(commands.Cog):
         index = self.return_index(ctx.guild.id, ctx)
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            self.servers[index].paused = True
+            self.servers[index] = self.servers[index]._replace(paused=True)
+            # self.servers[index].paused = True
             embed = main.embed_func(ctx, "Pause", "The song has been paused!")
             await ctx.send(embed=embed)
         else:
@@ -277,7 +290,7 @@ class Song(commands.Cog):
         index = self.return_index(ctx.guild.id, ctx)
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
-            self.servers[index].paused = False
+            self.servers[index] = self.servers[index]._replace(paused=False)
             embed = main.embed_func(ctx, "Resume", "The song has been resumed!")
             await ctx.send(embed=embed)
         else:
