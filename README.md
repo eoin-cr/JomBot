@@ -22,7 +22,7 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Commented code
+Updated readme
 
 ---
 
@@ -36,6 +36,12 @@ Once you have your token, download the JomBot repo and unzip it.  Create a file 
 DISCORD_TOKEN=INSERT YOUR DISCORD TOKEN HERE
 ```
 and put the file in the same directory as the bot.py file.
+
+Now you have to download all the libraries required.  To do that run the command
+
+```python
+pip install discord python-dotenv cryptocompare youtube_dl 
+```
 
 Then to run the bot you'll want to simply run `python3 bot.py` and it should be working.
 Note that the bot will only be running for as long as your terminal is open, so I'd 
