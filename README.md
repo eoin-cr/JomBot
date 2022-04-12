@@ -22,7 +22,8 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Updated readme
+Took the level up system I designed for UCD Netsoc's discord server and made it
+so it could be enabled in any server by a person with manage guild perms.
 
 ---
 
@@ -159,6 +160,26 @@ the bot you'll be able to change which users are able to call the command.
 *!send_ip
 ```
 * sends the current IP of the server hosting the bot
+
+---
+
+### Netsoc
+Although this cog was originally just custom build for UCD Netsoc's Discord server, I have expanded
+the functionality so it can be used on every server (after being enabled by a user with manage server
+perms).  This project was built using the [MEE6](https://github.com/Mee6/Mee6-documentation/blob/master/docs/levels_xp.md)
+level up/[XP](https://www.reddit.com/r/discordapp/comments/60z1eg/mee6_bot_levelling_system/) system.
+The functionality is disabled by default.
+
+```python
+!enable-level/enable-levelling/enable-levels/enable_level/enable_levelling/enable_levels (level up message channel)
+```
+* Command which enables the level up system.  The level up channel is the channel in which the bot
+will post messages informing users they have levelled up.  If no channel is given, JomBot will use
+the channel the command to enable the bot was sent in.  Requires manage guild perms
+```python
+!disable-level/disable-levelling/disable-levels/disable_level/disable_levelling/disable_levels
+```
+* This command disables the level up system.  Requires manage guild perms
 
 ---
 
