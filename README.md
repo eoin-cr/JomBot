@@ -22,8 +22,9 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Took the level up system I designed for UCD Netsoc's discord server and made it
-so it could be enabled in any server by a person with manage guild perms.
+Added foundation of ability to enable the functionality which gives a user a special role
+if they send more than a certain amount of messages every week.  NOTE: This code does not run.
+I am working on fixing it.
 
 ---
 
