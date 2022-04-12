@@ -22,8 +22,8 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Took the level up system I designed for UCD Netsoc's discord server and made it
-so it could be enabled in any server by a person with manage guild perms.
+Fixed problem.  Now the regular message function can be enabled on all servers without
+any issue.
 
 ---
 
@@ -146,9 +146,18 @@ API.  JomBot will store your coins in a personal wallet.
 
 ### HH
 This cog was custom built for a certain server.  It tracks the amount of messages each user sends
-and gives a regular role if a user sends more than a certain amount of messages each week.  Although
-this will not be enabled on any servers JomBot is added to by default, if you are self-hosting you
-can remove the server check.  This cog has no usable commands.
+and gives a regular role if a user sends more than a certain amount of messages each week.  
+By default this is disabled, however, you can enable it if you have manage server perms.
+```python
+!enable-regular/enable-weekly-messages/enable-weekly/enable_regular/enable_weekly_messages/enable_weekly/enable_weekly_message_counter [regular role name] (messages required for regular role (default is 125))
+```
+* Tracks the messages for the last 7 days.  If a user exceeds the amount of messages required to get the
+regular role it will be given to them.  If a user with the role does not meet the amount of messages
+required, the role will be removed.  Requires manage server perms to enable
+```python
+!disable-regular/disable-weekly-messages/disable-weekly/disable_regular/disable_weekly_messages/disable_weekly/disable_weekly_message_counter
+```
+* Disables the message tracker.  Requires manage server perms to disable
 
 ### IP
 This cog provides an easy way to get the IP of the device you are hosting the bot on.  This can be
