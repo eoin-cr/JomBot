@@ -61,7 +61,7 @@ class HH(commands.Cog):
             self.enabled_servers.append(ctx.guild.id)
 
             main = open_json(ctx.guild.id)
-            print(f"main: {main}")
+            # print(f"main: {main}")
             if "settings" not in main:
                 main["settings"] = {}
                 with open(f"data_files/{ctx.guild.id}.json", "w") as f:
@@ -96,7 +96,7 @@ class HH(commands.Cog):
             self.enabled_servers.pop(index)
 
             main = open_json(ctx.guild.id)
-            print(f"main: {main}")
+            # print(f"main: {main}")
             if "settings" not in main:
                 main["settings"] = {}
                 with open(f"data_files/{ctx.guild.id}.json", "w") as f:

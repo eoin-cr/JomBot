@@ -42,7 +42,7 @@ class Netsoc(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        print("Hi")
+        # print("Hi")
         print(member.guild.id)
         if member.guild.id == self.server_id:
             channel = member.guild.get_channel(self.welcome_channel)
@@ -53,8 +53,8 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        print("Hello")
-        print(member.guild.id)
+        # print("Hello")
+        # print(member.guild.id)
         if member.guild.id == self.server_id:
             channel = member.guild.get_channel(self.welcome_channel)
             await channel.send(
@@ -66,14 +66,14 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
     @commands.has_guild_permissions(manage_guild=True)
     async def enable_level(self, ctx, *channel):
         if len(channel) != 0:
-            print(f"channel: {channel}")
-            print(f"ch0: {channel[0]}")
+            # print(f"channel: {channel}")
+            # print(f"ch0: {channel[0]}")
             ch = channel[0].replace("<#", "").replace(">", "")
         else:
             ch = ctx.channel.id
 
         main = open_json(ctx.guild.id)
-        print(f"main: {main}")
+        # print(f"main: {main}")
         if "settings" not in main:
             main["settings"] = {}
             with open(f"data_files/{ctx.guild.id}.json", "w") as f:
@@ -94,7 +94,7 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
     @commands.has_guild_permissions(manage_guild=True)
     async def disable_level(self, ctx):
         main = open_json(ctx.guild.id)
-        print(f"main: {main}")
+        # print(f"main: {main}")
         if "settings" not in main:
             main["settings"] = {}
             with open(f"data_files/{ctx.guild.id}.json", "w") as f:
@@ -114,7 +114,7 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
     async def on_message(self, ctx):
         # calls the function to open the json file
         main = open_json(ctx.guild.id)
-        print(f"main: {main}")
+        # print(f"main: {main}")
         # print(main["settings"]["enabled"])
         if "settings" not in main:
             main["settings"] = {}
@@ -127,14 +127,14 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
             if not retry_after:
                 # you're not rate limited
 
-                print("hi")
+                # print("hi")
 
                 # # gets channel to send level up message in
                 # channel = ctx.guild.get_channel(self.level_channel)
                 # await channel.send(ctx.author.mention)
-                print(f"mainch: {main['settings']['levelling_channel']}")
+                # print(f"mainch: {main['settings']['levelling_channel']}")
                 channel = ctx.guild.get_channel(int(main["settings"]["levelling_channel"]))
-                print(f"ch2: {channel}")
+                # print(f"ch2: {channel}")
 
                 if "data" not in main:
                     main["data"] = {}
@@ -159,12 +159,12 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
                 level = main["data"][f"{uuid}"]['level']
                 new_xp = random.randint(15, 25)
 
-                print(f"xp: {xp} level: {level} new_xp: {new_xp}")
+                # print(f"xp: {xp} level: {level} new_xp: {new_xp}")
 
                 amount_to_next = 5 * (level ** 2) + (50 * level) + 100 - xp
 
                 if amount_to_next - new_xp <= 0:
-                    print(f"channel.send: {channel}")
+                    # print(f"channel.send: {channel}")
                     await channel.send("The results of hard work and dedication "
                                        "always look like luck to saps. But you "
                                        "know you've earned every ounce of your "
