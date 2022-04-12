@@ -5,6 +5,7 @@ import youtube_dl
 from discord.ext import tasks, commands
 import cogs.pond as pond
 import bot as main
+from collections import namedtuple
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ""
@@ -26,6 +27,18 @@ ytdl_format_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+# How this cog works: Basically what happens is we have a `servers` array containing
+# namedTuples (a form of structure).  Each namedTuple stores the guild id,
+# pretty playlist, raw playlist, current song playing, whether the song has
+# been paused, and ctx.  This means that each server that calls JomBot for
+# music will have its own playlist, rather than having one shared playlist
+# between all servers using JomBot.  Then we have a task loop which runs once
+# per second. This loop goes through every element of the servers array and
+# checks if a song is currently playing, and if not it plays the next item
+# in the queue.  This is also the reason we need the ctx item in the tuple,
+# as this task loop is simply running every second, rather than being directly
+# called, and it accounts for every server, it needs to know where to send
+# messages stating that it's playing the next song and the like.
 
 # Note on the pretty_playlist and playlist: The playlist is the one the bot uses
 # to select the next song in the queue.  However, the pretty_playlist is
@@ -91,15 +104,27 @@ async def queue_func(ctx, playlist):
 class Song(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.paused = False
-        self.playlist = []
-        self.pretty_playlist = []
-        self.current = ""
-        #         self.audio_player_task.start(ctx.guild)
+        self.Queue = namedtuple('Queue', ['id', 'pretty', 'raw', 'current', 'paused', 'ctx'])
+        self.servers = []
         print("Song initialised")
 
-    def cog_unload(self):
-        self.audio_player_task.cancel()
+    # Returns the index of the of the array element in the servers array which contains
+    # the id that matches the guild id of a message
+    def return_index(self, guild_id, ctx):
+        for i in range(len(self.servers)):
+            # print(f'servers[{i}].id = {self.servers[i].id} guild_id: {guild_id}')
+            if self.servers[i].id == guild_id:
+                # if a server with the needed id is found, then replace the ctx with
+                # the ctx of the last message, and return the index of that element
+                self.servers[i] = self.servers[i]._replace(ctx=ctx)
+                return i
+
+        # print(len(self.servers))
+        # otherwise, if there's no element for that server, create one and return the
+        # new length of the servers array - 1
+        self.servers.append(
+            self.Queue(id=guild_id, pretty=[], raw=[], current=None, paused=False, ctx=ctx))
+        return len(self.servers) - 1
 
     async def join_func(self, ctx):
         voice_channel = ctx.author.voice.channel
@@ -113,31 +138,48 @@ class Song(commands.Cog):
 
         # Starts the playlist task if it's not already started
         if not self.audio_player_task.is_running():
-            self.audio_player_task.start(ctx.guild, ctx)
+            self.audio_player_task.start()
 
     # Task loop goes through the playlist playing the next song
     @tasks.loop(seconds=1.0)
-    async def audio_player_task(self, guild, ctx):
-        # Ensures it doesn't move onto the next track when it's already playing
-        # music, or is paused, or if there's nothing in the playlist
-        if not ctx.voice_client.is_playing() and not self.paused and len(self.playlist) > 0:
-            async with ctx.typing():
-                player = await YTDLSource.from_url(
-                    self.playlist[0], loop=self.bot.loop, stream=True, timestamp=0
-                )
-                # Plays the next song
-                ctx.voice_client.play(
-                    player, after=lambda e: print("Player error: %s" % e) if e else None
-                )
+    # async def audio_player_task(self, guild, ctx):
+    async def audio_player_task(self):
+        # for each server "structure" in the array, check if music is currently playing,
+        # and if not, then play the next song in the queue
+        for i in range(len(self.servers)):
+            guild_id = self.servers[i].id
+            ctx = self.servers[i].ctx
+            # Ensures it doesn't move onto the next track when it's already playing
+            # music, or is paused, or if there's nothing in the playlist
+            index = self.return_index(guild_id, ctx)
+            # print(f"idx: {index}")
+            # print(f"servers {self.servers}")
+            # print(f"ind paused? {self.servers[index].paused}")
+            if not ctx.voice_client.is_playing() and not self.servers[index].paused \
+                    and self.servers[index].raw is not None and len(self.servers[index].raw) > 0:
+                async with ctx.typing():
+                    player = await YTDLSource.from_url(
+                        self.servers[index].raw[0], loop=self.bot.loop, stream=True, timestamp=0
+                    )
+                    # Plays the next song
+                    ctx.voice_client.play(
+                        player, after=lambda e: print("Player error: %s" % e) if e else None
+                    )
 
-            await ctx.send("Now playing: {}".format(player.title))
+                # await ctx.send("Now playing: {}".format(player.title))
+                embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
+                await ctx.send(embed=embed)
 
-            # Changes current to be the current song
-            self.current = self.playlist[0]
+                # Changes current to be the current song
+                # self.current = self.playlist[0]
+                self.servers[index] = self.servers[index]._replace(current=
+                                                                   self.servers[index].pretty[0])
 
-            # Removes first item in the playlists
-            self.playlist.pop(0)
-            self.pretty_playlist.pop(0)
+                # Removes first item in the playlists
+                # self.playlist.pop(0)
+                self.servers[index].raw.pop(0)
+                # self.pretty_playlist.pop(0)
+                self.servers[index].pretty.pop(0)
 
     @commands.command(name="join", aliases=["j"], help="Joins a voice channel")
     async def join(self, ctx):
@@ -151,7 +193,7 @@ class Song(commands.Cog):
 
         # Checks if the playlist task is running, if not it starts it
         if not self.audio_player_task.is_running():
-            self.audio_player_task.start(ctx.guild, ctx)
+            self.audio_player_task.start()
 
         # Either moves or joins a new vc
         if ctx.voice_client is None:
@@ -178,12 +220,15 @@ class Song(commands.Cog):
         await self.join_func(ctx)
         # If there's stuff in the playlist or if it's already playing, add the
         # song to the playlist
-        if len(self.playlist) > 0 or ctx.voice_client.is_playing():
+        index = self.return_index(ctx.guild.id, ctx)
+        if len(self.servers[index].raw) > 0 or ctx.voice_client.is_playing():
             player = await YTDLSource.from_url(
                 url
             )
-            self.playlist.append(url)
-            self.pretty_playlist.append(player.title)
+            # self.playlist.append(url)
+            self.servers[index].raw.append(url)
+            # self.pretty_playlist.append(player.title)
+            self.servers[index].pretty.append(player.title)
             embed = main.embed_func(ctx, "Play", f"{player.title} has been added to the queue")
             await ctx.send(embed=embed)
 
@@ -197,7 +242,8 @@ class Song(commands.Cog):
                     player, after=lambda e: print(f"Player error: {e}") if e else None
                 )
 
-            self.current = url
+            # self.current = url
+            self.servers[index] = self.servers[index]._replace(current=url)
             embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
             await ctx.send(embed=embed)
 
@@ -206,12 +252,13 @@ class Song(commands.Cog):
     async def piss(self, ctx):
         await self.join_func(ctx)
 
+        index = self.return_index(ctx.guild.id, ctx)
         player = await YTDLSource.from_url(
             "Momentary bliss", loop=self.bot.loop, timestamp=0
         )
-        if len(self.playlist) > 0 or ctx.voice_client.is_playing():
-            self.playlist.append("Momentary bliss")
-            self.pretty_playlist.append(player.title)
+        if len(self.servers[index].raw) > 0 or ctx.voice_client.is_playing():
+            self.servers[index].raw.append("Momentary bliss")
+            self.servers[index].pretty.append(player.title)
 
             embed = main.embed_func(ctx, "Play", f"Momentary bliss has been added to the queue")
             await ctx.send(embed=embed)
@@ -220,15 +267,18 @@ class Song(commands.Cog):
                 ctx.voice_client.play(
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
-            self.current = "Momentary bliss"
+            # self.current = "Momentary bliss"
+            self.servers[index] = self.servers[index]._replace(current="Momentary Bliss")
             embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
             await ctx.send(embed=embed)
 
     @commands.command(name="pause", help="Pauses the song")
     async def pause(self, ctx):
+        index = self.return_index(ctx.guild.id, ctx)
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            self.paused = True
+            self.servers[index] = self.servers[index]._replace(paused=True)
+            # self.servers[index].paused = True
             embed = main.embed_func(ctx, "Pause", "The song has been paused!")
             await ctx.send(embed=embed)
         else:
@@ -237,9 +287,10 @@ class Song(commands.Cog):
 
     @commands.command(name="resume", help="Resumes the song")
     async def resume(self, ctx):
+        index = self.return_index(ctx.guild.id, ctx)
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
-            self.paused = False
+            self.servers[index] = self.servers[index]._replace(paused=False)
             embed = main.embed_func(ctx, "Resume", "The song has been resumed!")
             await ctx.send(embed=embed)
         else:
@@ -248,11 +299,13 @@ class Song(commands.Cog):
 
     @commands.command(name="queue", aliases=["q"], help="Displays the queue")
     async def queue(self, ctx):
-        await queue_func(ctx, self.pretty_playlist)
+        index = self.return_index(ctx.guild.id, ctx)
+        await queue_func(ctx, self.servers[index].pretty)
 
     @commands.command(name="raw_queue", help="Displays the raw queue for debugging")
     async def raw_queue(self, ctx):
-        await queue_func(ctx, self.playlist)
+        index = self.return_index(ctx.guild.id, ctx)
+        await queue_func(ctx, self.servers[index].raw)
 
     @commands.command(name="skip", help="Skips the current song")
     async def skip(self, ctx):
@@ -266,12 +319,13 @@ class Song(commands.Cog):
 
     @commands.command(name="seek", help="Seeks (in seconds) to a certain part of the song")
     async def seek(self, ctx, timestamp):
+        index = self.return_index(ctx.guild.id, ctx)
         # If the bot is playing, pauses the music, and sets self.paused to true
         # so the playlist task doesn't start playing the next song
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            self.paused = True
-        if self.current == "":
+            self.servers[index].paused = True
+        if self.servers[index].current is None:
             embed = main.embed_func(ctx, "Seek", "No music is currently playing!", discord.Color.red())
             await ctx.send(embed=embed)
 
@@ -282,20 +336,21 @@ class Song(commands.Cog):
         else:
             async with ctx.typing():
                 player = await YTDLSource.from_url(
-                    self.current, loop=self.bot.loop, stream=True, timestamp=timestamp
+                    self.servers[index].current, loop=self.bot.loop, stream=True, timestamp=timestamp
                 )
                 ctx.voice_client.play(
                     player, after=lambda e: print(f"Player error: {e}") if e else None
                 )
-            self.paused = False
+            self.servers[index].paused = False
             embed = main.embed_func(ctx, "Seek", f"Seeked to {timestamp}s")
             await ctx.send(embed=embed)
 
     @commands.command(name="current", help="Displays the currently playing song")
     async def current(self, ctx):
-        if self.current is not None and ctx.voice_client.is_playing():
+        index = self.return_index(ctx.guild.id, ctx)
+        if self.servers[index].current is not None and ctx.voice_client.is_playing():
             player = await YTDLSource.from_url(
-                self.current
+                self.servers[index].current
             )
             embed = main.embed_func(ctx, "Current", f"Currently playing: {player.title}")
             # print(player.url)
@@ -306,31 +361,34 @@ class Song(commands.Cog):
 
     @commands.command(name="remove", aliases=["r", "rm", "del", "delete"], help="Removes an item from the queue")
     async def remove(self, ctx, num):
-
-        if int(num) > len(self.playlist):
-            embed = main.embed_func(ctx, "Remove", "There is no item in the queue with this value!", discord.Color.red())
+        index = self.return_index(ctx.guild.id, ctx)
+        if int(num) > len(self.servers[index].raw):
+            embed = main.embed_func(ctx, "Remove", "There is no item in the queue "
+                                                   "with this value!", discord.Color.red())
             await ctx.send(embed=embed)
         else:
-            embed = main.embed_func(ctx, "Remove", "Removed {} from the queue".format(self.pretty_playlist[int(num) - 1]))
+            embed = main.embed_func(ctx, "Remove", "Removed "
+                                                   "{} from the queue".format(self.servers[index].pretty[int(num) - 1]))
             await ctx.send(embed=embed)
-            self.playlist.pop(int(num) - 1)
-            self.pretty_playlist.pop(int(num) - 1)
+            self.servers[index].raw.pop(int(num) - 1)
+            self.servers[index].pretty.pop(int(num) - 1)
 
     @commands.command(name="move", aliases=["m", "mv"], help="Moves an item in the queue")
     async def move(self, ctx, old, new):
-
-        if int(old) > len(self.playlist):
-            embed = main.embed_func(ctx, "Remove", "There is no item in the queue with this value!", discord.Color.red())
+        index = self.return_index(ctx.guild.id, ctx)
+        if int(old) > len(self.servers[index].raw):
+            embed = main.embed_func(ctx, "Remove", "There is no item in"
+                                                   " the queue with this value!", discord.Color.red())
             await ctx.send(embed=embed)
-        elif int(new) > len(self.playlist):
+        elif int(new) > len(self.servers[index].raw):
             embed = main.embed_func(ctx, "Move", "Please enter a new queue position within the bounds"
                                                  " of the queue!", discord.Color.red())
             await ctx.send(embed=embed)
         else:
-            self.playlist.insert(int(new) - 1, self.playlist.pop(int(old) - 1))
-            self.pretty_playlist.insert(int(new) - 1, self.pretty_playlist.pop(int(old) - 1))
+            self.servers[index].raw.insert(int(new) - 1, self.servers[index].raw.pop(int(old) - 1))
+            self.servers[index].pretty.insert(int(new) - 1, self.servers[index].pretty.pop(int(old) - 1))
             embed = main.embed_func(ctx, "Move", "Moved {} to number {} in the "
-                                                 "queue".format(self.pretty_playlist[int(new) - 1], new))
+                                                 "queue".format(self.servers[index].pretty[int(new) - 1], new))
             await ctx.send(embed=embed)
 
 

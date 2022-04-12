@@ -15,14 +15,14 @@ to the server)
 * Can tell you the IP of the server it's hosted on and let you know when it changes
   (useful if you're self hosting and don't have a static domain)
 * Crypto trading simulator using real time prices from the cryptocompare API
+* Added implementation of MEE6 level system
 
 Default prefix: `!`
 
 ---
 
 # Added in this commit:
-Added stuff for UCD Netsoc server, including welcome and leave messages, as
-well as a leveling system.
+Commented code
 
 ---
 
