@@ -34,7 +34,7 @@ class Netsoc(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        print("Hi")
+        # print("Hi")
         print(member.guild.id)
         if member.guild.id == self.server_id:
             channel = member.guild.get_channel(self.welcome_channel)
@@ -45,7 +45,7 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        print("Hello")
+        # print("Hello")
         print(member.guild.id)
         if member.guild.id == self.server_id:
             channel = member.guild.get_channel(self.welcome_channel)
@@ -59,7 +59,7 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
             bucket = self._cd.get_bucket(ctx)
             retry_after = bucket.update_rate_limit()
             if not retry_after:
-                print("Hello")
+                # print("Hello")
                 # you're not rate limited
                 # calls the function to open the json file
                 data = open_json()
@@ -88,7 +88,7 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
                 level = data[f"{uuid}"]['level']
                 new_xp = random.randint(15, 25)
 
-                print(f"xp: {xp} level: {level} new_xp: {new_xp}")
+                # print(f"xp: {xp} level: {level} new_xp: {new_xp}")
 
                 amount_to_next = 5 * (level ** 2) + (50 * level) + 100 - xp
 
