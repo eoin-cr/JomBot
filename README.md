@@ -22,15 +22,9 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-The foundation of functionality of having a per-server music queue.  At the moment,
-one queue is saved and used between all servers, meaning, what plays next could
-be music someone you don't even know started playing.  Obviously this becomes an
-issue when multiple servers are playing music at the same time.  To combat that I
-am trying to make a namedtuple which contains a raw and pretty playlist for each
-server, as well as the current song, and the id of the server this is all for,
-obviously.  At the moment there are issues with queues transferring between different
-servers, so the different server tuples don't seem to be properly segregated.  I
-will work on fixing this tomorrow.
+Properly implemented different queues for different servers.  Now you cannot view songs people
+on other servers have added, only songs added on your own server.  However, the skip function
+seems to be broken when you run it on a second server (it still works fine on the first one).
 
 ---
 

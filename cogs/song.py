@@ -96,22 +96,23 @@ class Song(commands.Cog):
         self.playlist = []
         self.pretty_playlist = []
         self.current = ""
-        self.Queue = namedtuple('Queue', ['id', 'pretty', 'raw', 'current'])
+        self.Queue = namedtuple('Queue', ['id', 'pretty', 'raw', 'current', 'paused'])
         self.servers = []
         #         self.audio_player_task.start(ctx.guild)
         print("Song initialised")
 
-    def cog_unload(self):
-        self.audio_player_task.cancel()
-
-    def return_index(self, id):
+    # def cog_unload(self):
+    #     self.audio_player_task.cancel()
+    #
+    def return_index(self, guild_id):
         for i in range(len(self.servers)):
-            if self.servers[i].id == id:
-                return i - 1
+            print(f'servers[{i}].id = {self.servers[i].id} guild_id: {guild_id}')
+            if self.servers[i].id == guild_id:
+                return i
 
         print(len(self.servers))
         self.servers.append(
-            self.Queue(id=id, pretty=[], raw=[], current=None))
+            self.Queue(id=guild_id, pretty=[], raw=[], current=None, paused=False))
         return len(self.servers) - 1
 
     async def join_func(self, ctx):
@@ -134,20 +135,23 @@ class Song(commands.Cog):
         # Ensures it doesn't move onto the next track when it's already playing
         # music, or is paused, or if there's nothing in the playlist
         index = self.return_index(guild.id)
-        print(index)
-        print(self.servers)
-        if not ctx.voice_client.is_playing() and not self.paused \
+        print(f"idx: {index}")
+        print(f"servers {self.servers}")
+        print(f"ind paused? {self.servers[index].paused}")
+        if not ctx.voice_client.is_playing() and not self.servers[index].paused \
                 and self.servers[index].raw is not None and len(self.servers[index].raw) > 0:
             async with ctx.typing():
                 player = await YTDLSource.from_url(
-                    self.playlist[0], loop=self.bot.loop, stream=True, timestamp=0
+                    self.servers[index].raw[0], loop=self.bot.loop, stream=True, timestamp=0
                 )
                 # Plays the next song
                 ctx.voice_client.play(
                     player, after=lambda e: print("Player error: %s" % e) if e else None
                 )
 
-            await ctx.send("Now playing: {}".format(player.title))
+            # await ctx.send("Now playing: {}".format(player.title))
+            embed = main.embed_func(ctx, "Play", f"Now playing: {player.title}")
+            await ctx.send(embed=embed)
 
             # Changes current to be the current song
             # self.current = self.playlist[0]
@@ -253,9 +257,10 @@ class Song(commands.Cog):
 
     @commands.command(name="pause", help="Pauses the song")
     async def pause(self, ctx):
+        index = self.return_index(ctx.guild.id)
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            self.paused = True
+            self.servers[index].paused = True
             embed = main.embed_func(ctx, "Pause", "The song has been paused!")
             await ctx.send(embed=embed)
         else:
@@ -264,9 +269,10 @@ class Song(commands.Cog):
 
     @commands.command(name="resume", help="Resumes the song")
     async def resume(self, ctx):
+        index = self.return_index(ctx.guild.id)
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
-            self.paused = False
+            self.servers[index].paused = False
             embed = main.embed_func(ctx, "Resume", "The song has been resumed!")
             await ctx.send(embed=embed)
         else:
@@ -300,7 +306,7 @@ class Song(commands.Cog):
         # so the playlist task doesn't start playing the next song
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            self.paused = True
+            self.servers[index].paused = True
         if self.servers[index].current is None:
             embed = main.embed_func(ctx, "Seek", "No music is currently playing!", discord.Color.red())
             await ctx.send(embed=embed)
@@ -317,7 +323,7 @@ class Song(commands.Cog):
                 ctx.voice_client.play(
                     player, after=lambda e: print(f"Player error: {e}") if e else None
                 )
-            self.paused = False
+            self.servers[index].paused = False
             embed = main.embed_func(ctx, "Seek", f"Seeked to {timestamp}s")
             await ctx.send(embed=embed)
 
