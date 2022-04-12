@@ -22,7 +22,8 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Updated readme
+Fixed problem.  Now the regular message function can be enabled on all servers without
+any issue.
 
 ---
 
@@ -145,9 +146,18 @@ API.  JomBot will store your coins in a personal wallet.
 
 ### HH
 This cog was custom built for a certain server.  It tracks the amount of messages each user sends
-and gives a regular role if a user sends more than a certain amount of messages each week.  Although
-this will not be enabled on any servers JomBot is added to by default, if you are self-hosting you
-can remove the server check.  This cog has no usable commands.
+and gives a regular role if a user sends more than a certain amount of messages each week.  
+By default this is disabled, however, you can enable it if you have manage server perms.
+```python
+!enable-regular/enable-weekly-messages/enable-weekly/enable_regular/enable_weekly_messages/enable_weekly/enable_weekly_message_counter [regular role name] (messages required for regular role (default is 125))
+```
+* Tracks the messages for the last 7 days.  If a user exceeds the amount of messages required to get the
+regular role it will be given to them.  If a user with the role does not meet the amount of messages
+required, the role will be removed.  Requires manage server perms to enable
+```python
+!disable-regular/disable-weekly-messages/disable-weekly/disable_regular/disable_weekly_messages/disable_weekly/disable_weekly_message_counter
+```
+* Disables the message tracker.  Requires manage server perms to disable
 
 ### IP
 This cog provides an easy way to get the IP of the device you are hosting the bot on.  This can be
@@ -159,6 +169,26 @@ the bot you'll be able to change which users are able to call the command.
 *!send_ip
 ```
 * sends the current IP of the server hosting the bot
+
+---
+
+### Netsoc
+Although this cog was originally just custom build for UCD Netsoc's Discord server, I have expanded
+the functionality so it can be used on every server (after being enabled by a user with manage server
+perms).  This project was built using the [MEE6](https://github.com/Mee6/Mee6-documentation/blob/master/docs/levels_xp.md)
+level up/[XP](https://www.reddit.com/r/discordapp/comments/60z1eg/mee6_bot_levelling_system/) system.
+The functionality is disabled by default.
+
+```python
+!enable-level/enable-levelling/enable-levels/enable_level/enable_levelling/enable_levels (level up message channel)
+```
+* Command which enables the level up system.  The level up channel is the channel in which the bot
+will post messages informing users they have levelled up.  If no channel is given, JomBot will use
+the channel the command to enable the bot was sent in.  Requires manage guild perms
+```python
+!disable-level/disable-levelling/disable-levels/disable_level/disable_levelling/disable_levels
+```
+* This command disables the level up system.  Requires manage guild perms
 
 ---
 
