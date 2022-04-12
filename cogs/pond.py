@@ -216,7 +216,8 @@ So if your messages are getting removed, that might be why""")
             return
 
     @commands.command(name="disable-introductions", alias="disable_introductions",
-                      help="Disables functionality that lets people"
+                      brief="Locks introductions",
+                      help="Disables functionality that lets people "
                            "speak in general after messaging introductions")
     @pond_check()
     async def disable_introductions(self, ctx):
@@ -226,6 +227,7 @@ So if your messages are getting removed, that might be why""")
         await ctx.send(embed=embed)
 
     @commands.command(name="enable-introductions", alias="enable_introductions",
+                      brief="Unlocks introductions",
                       help="Enables functionality that lets people"
                            "speak in general after messaging introductions")
     @pond_check()
