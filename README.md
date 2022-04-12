@@ -22,9 +22,8 @@ Default prefix: `!`
 ---
 
 # Added in this commit:
-Properly implemented different queues for different servers.  Now you cannot view songs people
-on other servers have added, only songs added on your own server.  However, the skip function
-seems to be broken when you run it on a second server (it still works fine on the first one).
+Queue loop has been changed so it checks all servers currently playing, therefore making the
+skip function work.
 
 ---
 
