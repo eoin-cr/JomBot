@@ -27,6 +27,7 @@ class HH(commands.Cog):
     # the messages sent in the last week are counted
     @tasks.loop(seconds=86400)
     async def clear_message_task(self):
+        # does the loop for every server in the enabled servers list
         for element in self.enabled_servers:
             now = datetime.datetime.now()
             day = str(now.strftime('%A'))
@@ -43,7 +44,7 @@ class HH(commands.Cog):
                 json.dump(data, f)
 
     @commands.command(name="enable-regular", aliases=["enable-weekly-messages", "enable-weekly",
-                                                      "enable-regular", "enable_regular",
+                                                      "enable_regular",
                                                       "enable_weekly_messages", "enable_weekly",
                                                       "enable_weekly_message_counter"],
                       brief="Enables automated regular role function", help="!enable-regular "
@@ -52,6 +53,7 @@ class HH(commands.Cog):
                                                                             "default 125/week)")
     @commands.has_guild_permissions(manage_guild=True)
     async def enable_regular(self, ctx, role, *amount):
+        # checks if it's already been enabled
         if ctx.guild.id in self.enabled_servers:
             embed = main_bot.embed_func(ctx, "Regular", "Regular checker is already enabled", discord.Color.red)
             await ctx.send(embed=embed)
@@ -80,7 +82,7 @@ class HH(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="disable-regular", aliases=["disable-weekly-messages", "disable-weekly",
-                                                       "disable-regular", "disable_regular",
+                                                       "disable_regular",
                                                        "disable_weekly_messages", "disable_weekly",
                                                        "disable_weekly_message_counter"],
                       help="Disables automated regular role function")
