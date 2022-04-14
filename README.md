@@ -25,8 +25,8 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed problem. Now the regular message function can be enabled on all servers
-without any issue.
+Fixed issue where the hh cog wouldn't create a data key in the JSON file if
+one didn't exist already.
 
 ---
 

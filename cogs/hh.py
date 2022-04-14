@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 import bot as main_bot
 import datetime
 import json
+import random
 import os
 from cogs.netsoc import open_json
 
@@ -136,6 +137,10 @@ class HH(commands.Cog):
             if not self.clear_message_task.is_running():
                 self.clear_message_task.start()
 
+            # if there is no data key, create one
+            if "data" not in main:
+                main["data"] = {}
+
             # if there isn't a uuid struct, create one
             if f"{uuid}" not in main["data"]:
                 main["data"][f"{uuid}"] = {}
@@ -167,6 +172,15 @@ class HH(commands.Cog):
             # write the json data to the file
             with open(f"data_files/{ctx.guild.id}.json", "w") as f:
                 json.dump(main, f)
+
+    @commands.command(name="flip", help="Flips a coin.  That's it.")
+    async def flip(self, ctx):
+        num = random.randint(1, 2)
+        # print(num)
+        if num == 1:
+            await ctx.send("Heads")
+        else:
+            await ctx.send("Tails")
 
 
 def setup(bot):
