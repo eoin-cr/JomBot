@@ -1,4 +1,6 @@
-discord
-python-dotenv
-cryptocompare
+discord~=1.7.3
+python-dotenv~=0.19.2
+cryptocompare~=0.7.5
 youtube_dl
+google-cloud-translate==2.0.1
+six~=1.16.0

@@ -9,6 +9,8 @@ intents.members = True
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+GOOGLE_KEY = os.getenv('GOOGLE_API')
+GOOGLE_ID = os.getenv('GOOGLE_ID')
 
 # The prefix is either ! or a little chicken emoji.  How fun :)
 bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> '], intents=intents)
@@ -42,10 +44,12 @@ bot.load_extension("cogs.ip")
 bot.load_extension("cogs.song")
 bot.load_extension("cogs.wordle")
 bot.load_extension("cogs.time")
-bot.load_extension("cogs.error")
+# bot.load_extension("cogs.error")
 # bot.load_extension("cogs.embed_test")
 bot.load_extension("cogs.netsoc")
 bot.load_extension("cogs.hh")
+# bot.load_extension("cogs.test")
+bot.load_extension("cogs.translate")
 
 # Runs the bot using a .env stored bot token
 bot.run(TOKEN)

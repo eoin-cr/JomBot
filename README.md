@@ -61,6 +61,19 @@ NOTE: Whilst most of the functionality should work out of the box, there are
 several commands that will only run on certain servers. Change the id the
 command looks for in code to the id of your server/channel.
 
+### Running the translate feature
+
+The translate feature uses Google's translate API. You can see the prices for
+that [here](https://cloud.google.com/translate/pricing?hl=en_US). It's free for
+under 500k chars translated per month. If you are self-hosting, create an
+account and then take a look at the 
+[documentation](https://cloud.google.com/translate/docs/basic/translating-text).
+In my experience, getting the translate feature running via Pycharm's run
+option is far more annoying than just doing it through the terminal. I'd
+recommend just getting the JSON key and then placing 
+`export GOOGLE_APPLICATION_CREDENTIALS="[/place/in/system/key.json]` in your
+bash/zshrc. Then the program should work fine.
+
 ---
 
 # Building your own bot
@@ -414,6 +427,23 @@ the code assumes you're hosting from UTC+0
 ```
 
 - Sets the timezone of a user or yourself.
+
+### Translate
+
+This utilises the Google translate API in order to detect what language a
+message was sent in, and then convert it to English. If you've invited
+JomBot to your server rather than self-hosting, please don't go overboard
+with the amount of characters translated, as otherwise I will be charged and
+simply disable this functionality globally.
+
+```python
+!translate
+```
+
+- This command is different from most others, as rather than translating
+the text after the command, instead, it translates the text in the
+*message you are replying to*.  If you do not reply to a message this command
+will not work.
 
 ### Wordle
 
