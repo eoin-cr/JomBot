@@ -210,6 +210,12 @@ enable it if you have manage server perms.
 
 - Disables the message tracker. Requires manage server perms to disable
 
+```python
+!vibe-check/vibe_check [@user]
+```
+
+- Prints how good the vibes of a user are
+
 ### IP
 
 This cog provides an easy way to get the IP of the device you are hosting the

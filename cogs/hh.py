@@ -182,6 +182,22 @@ class HH(commands.Cog):
         else:
             await ctx.send("Tails")
 
+    @commands.command(name="vibe-check", alias="vibe_check", help="Checks someones"
+                                                                  " vibes.")
+    async def vibe_check(self, ctx, user):
+        user = int(user.strip('@,<>,!,()'))
+        vibes = ["hellish", "awful", "horrendous", "atrocious", "mediocre",
+                 "acceptable", "decent", "ok", "good", "great", "fantastic",
+                 "really good", "the best", "immaculate"]
+
+        num = random.randint(0, len(vibes))
+        memb = await ctx.guild.fetch_member(user)
+        embed = discord.Embed(color=discord.Color.blue())
+        embed.add_field(name="Vibe check", value=f"{memb.mention} has {vibes[num]} vibes!")
+        embed.set_author(name=memb.display_name, icon_url=memb.avatar_url)
+        await ctx.send(embed=embed)
+
+
 
 def setup(bot):
     bot.add_cog(HH(bot))
