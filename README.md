@@ -25,7 +25,8 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added the option to display/delete the current prefix
+Fixed command which displays prefix—the error arose from checking for
+`ctx.guild.id` in the file, rather than `f"{ctx.guild.id}"`.
 
 ---
 

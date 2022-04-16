@@ -40,7 +40,7 @@ class Control(commands.Cog):
             data = json.load(f)
 
         # checks if there's an entry for this guild in the data
-        if ctx.guild.id not in data:
+        if f"{ctx.guild.id}" not in data:
             # if there's no custom prefix, the server must be using the
             # default prefix, so return that
             prefix = "!"
@@ -49,6 +49,8 @@ class Control(commands.Cog):
             # otherwise, return the prefix they have stored
             prefix = data[f"{ctx.guild.id}"]["prefix"]
 
+        if prefix == "":
+            prefix = "!"
         embed = main.embed_func(ctx, "Custom prefix", "Your custom prefix is"
                                                       f" {prefix}")
         await ctx.send(embed=embed)
