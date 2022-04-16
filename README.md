@@ -25,8 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed issue where the hh cog wouldn't create a data key in the JSON file if
-one didn't exist already.
+Fixed issue where print function was missing ctx.
 
 ---
 
@@ -434,6 +433,8 @@ the code assumes you're hosting from UTC+0
 
 - Sets the timezone of a user or yourself.
 
+---
+
 ### Translate
 
 This utilises the Google translate API in order to detect what language a
@@ -450,6 +451,8 @@ simply disable this functionality globally.
 the text after the command, instead, it translates the text in the
 *message you are replying to*.  If you do not reply to a message this command
 will not work.
+
+---
 
 ### Wordle
 
