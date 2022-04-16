@@ -48,8 +48,14 @@ async def determine_prefix(bot, message):
             if f"{guild.id}" in main:
                 # if there is, set the prefix for that server's custom prefix
                 prefix = main[f"{guild.id}"]["prefix"]
+                if prefix == "":
+                    return default_prefixes
+
                 # print("yes")
-                return prefix
+                # just makes sure that pinging the bot in place of a prefix
+                # works, even when a custom prefix is used
+                prefix_list = [prefix, default_prefixes[2]]
+                return prefix_list
 
             # print("nope")
 

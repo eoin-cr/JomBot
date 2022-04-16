@@ -25,9 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added per-server prefix commands, and fixed bug where on messages sent in DMs
-the bot would attempt to open the corresponding JSON file for the guild id,
-despite the fact that as it was a DM, there would be no guild id.
+Added the option to display/delete the current prefix
 
 ---
 
