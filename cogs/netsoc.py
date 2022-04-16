@@ -112,70 +112,71 @@ Please make sure to read the rules in <#687431174200492100> , get your pronouns 
     @commands.Cog.listener()
     # @commands.cooldown(1, 60, commands.BucketType.user)
     async def on_message(self, ctx):
-        # calls the function to open the json file
-        main = open_json(ctx.guild.id)
-        # print(f"main: {main}")
-        # print(main["settings"]["enabled"])
-        if "settings" not in main:
-            main["settings"] = {}
-            with open(f"data_files/{ctx.guild.id}.json", "w") as f:
-                json.dump(main, f)
-
-        elif not ctx.author.bot and "levelling_enabled" in main["settings"] and main["settings"]["levelling_enabled"]:
-            bucket = self._cd.get_bucket(ctx)
-            retry_after = bucket.update_rate_limit()
-            if not retry_after:
-                # you're not rate limited
-
-                # print("hi")
-
-                # # gets channel to send level up message in
-                # channel = ctx.guild.get_channel(self.level_channel)
-                # await channel.send(ctx.author.mention)
-                # print(f"mainch: {main['settings']['levelling_channel']}")
-                channel = ctx.guild.get_channel(int(main["settings"]["levelling_channel"]))
-                # print(f"ch2: {channel}")
-
-                if "data" not in main:
-                    main["data"] = {}
-
-                uuid = ctx.author.id
-
-                # if there isn't a uuid struct, create one
-                if f"{uuid}" not in main["data"]:
-                    main["data"][f"{uuid}"] = {}
-
-                # if there isn't a value for a user's XP in the uuid struct,
-                # set the value to 0
-                if "xp" not in main["data"][f"{uuid}"]:
-                    main["data"][f'{uuid}']['xp'] = 0
-
-                # if there isn't a value for a user's level in the uuid struct,
-                # set the value to 0
-                if "level" not in main["data"][f"{uuid}"]:
-                    main["data"][f'{uuid}']['level'] = 0
-
-                xp = main["data"][f'{uuid}']['xp']
-                level = main["data"][f"{uuid}"]['level']
-                new_xp = random.randint(15, 25)
-
-                # print(f"xp: {xp} level: {level} new_xp: {new_xp}")
-
-                amount_to_next = 5 * (level ** 2) + (50 * level) + 100 - xp
-
-                if amount_to_next - new_xp <= 0:
-                    # print(f"channel.send: {channel}")
-                    await channel.send("The results of hard work and dedication "
-                                       "always look like luck to saps. But you "
-                                       "know you've earned every ounce of your "
-                                       f"success. GG {ctx.author.mention}, you just advanced to "
-                                       f"level {level + 1}")
-                    main["data"][f"{uuid}"]["level"] += 1
-                    xp = 0 - amount_to_next
-
-                main["data"][f"{uuid}"]["xp"] = xp + new_xp
+        if ctx.guild:
+            # calls the function to open the json file
+            main = open_json(ctx.guild.id)
+            # print(f"main: {main}")
+            # print(main["settings"]["enabled"])
+            if "settings" not in main:
+                main["settings"] = {}
                 with open(f"data_files/{ctx.guild.id}.json", "w") as f:
                     json.dump(main, f)
+
+            elif not ctx.author.bot and "levelling_enabled" in main["settings"] and main["settings"]["levelling_enabled"]:
+                bucket = self._cd.get_bucket(ctx)
+                retry_after = bucket.update_rate_limit()
+                if not retry_after:
+                    # you're not rate limited
+
+                    # print("hi")
+
+                    # # gets channel to send level up message in
+                    # channel = ctx.guild.get_channel(self.level_channel)
+                    # await channel.send(ctx.author.mention)
+                    # print(f"mainch: {main['settings']['levelling_channel']}")
+                    channel = ctx.guild.get_channel(int(main["settings"]["levelling_channel"]))
+                    # print(f"ch2: {channel}")
+
+                    if "data" not in main:
+                        main["data"] = {}
+
+                    uuid = ctx.author.id
+
+                    # if there isn't a uuid struct, create one
+                    if f"{uuid}" not in main["data"]:
+                        main["data"][f"{uuid}"] = {}
+
+                    # if there isn't a value for a user's XP in the uuid struct,
+                    # set the value to 0
+                    if "xp" not in main["data"][f"{uuid}"]:
+                        main["data"][f'{uuid}']['xp'] = 0
+
+                    # if there isn't a value for a user's level in the uuid struct,
+                    # set the value to 0
+                    if "level" not in main["data"][f"{uuid}"]:
+                        main["data"][f'{uuid}']['level'] = 0
+
+                    xp = main["data"][f'{uuid}']['xp']
+                    level = main["data"][f"{uuid}"]['level']
+                    new_xp = random.randint(15, 25)
+
+                    # print(f"xp: {xp} level: {level} new_xp: {new_xp}")
+
+                    amount_to_next = 5 * (level ** 2) + (50 * level) + 100 - xp
+
+                    if amount_to_next - new_xp <= 0:
+                        # print(f"channel.send: {channel}")
+                        await channel.send("The results of hard work and dedication "
+                                           "always look like luck to saps. But you "
+                                           "know you've earned every ounce of your "
+                                           f"success. GG {ctx.author.mention}, you just advanced to "
+                                           f"level {level + 1}")
+                        main["data"][f"{uuid}"]["level"] += 1
+                        xp = 0 - amount_to_next
+
+                    main["data"][f"{uuid}"]["xp"] = xp + new_xp
+                    with open(f"data_files/{ctx.guild.id}.json", "w") as f:
+                        json.dump(main, f)
 
 
 def setup(bot):

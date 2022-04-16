@@ -115,63 +115,64 @@ class HH(commands.Cog):
     @commands.Cog.listener()
     @hh_check()
     async def on_message(self, ctx):
-        # if ctx.guild.id == 829349685667430460:  # Pond
-        # if ctx.guild.id == 574368093636395018:  # HH
-        main = open_json(ctx.guild.id)
-        if "settings" not in main:
-            main["settings"] = {}
-            with open(f"data_files/{ctx.guild.id}.json", "w") as f:
-                json.dump(main, f)
+        if ctx.guild:
+            # if ctx.guild.id == 829349685667430460:  # Pond
+            # if ctx.guild.id == 574368093636395018:  # HH
+            main = open_json(ctx.guild.id)
+            if "settings" not in main:
+                main["settings"] = {}
+                with open(f"data_files/{ctx.guild.id}.json", "w") as f:
+                    json.dump(main, f)
 
-        elif (not ctx.author.bot and "regular_enabled" in main["settings"] and
-                main["settings"]["regular_enabled"]):
-            uuid = ctx.author.id
-            now = datetime.datetime.now()
-            day = str(now.strftime('%A'))
-            messages = 0
+            elif (not ctx.author.bot and "regular_enabled" in main["settings"] and
+                    main["settings"]["regular_enabled"]):
+                uuid = ctx.author.id
+                now = datetime.datetime.now()
+                day = str(now.strftime('%A'))
+                messages = 0
 
-            # calls the function to open the json file
-            data = open_json(ctx.guild.id)
+                # calls the function to open the json file
+                data = open_json(ctx.guild.id)
 
-            # if the clear message task isn't running, start it
-            if not self.clear_message_task.is_running():
-                self.clear_message_task.start()
+                # if the clear message task isn't running, start it
+                if not self.clear_message_task.is_running():
+                    self.clear_message_task.start()
 
-            # if there is no data key, create one
-            if "data" not in main:
-                main["data"] = {}
+                # if there is no data key, create one
+                if "data" not in main:
+                    main["data"] = {}
 
-            # if there isn't a uuid struct, create one
-            if f"{uuid}" not in main["data"]:
-                main["data"][f"{uuid}"] = {}
+                # if there isn't a uuid struct, create one
+                if f"{uuid}" not in main["data"]:
+                    main["data"][f"{uuid}"] = {}
 
-            # if there isn't a value for today's day in the uuid struct,
-            # set the value to 0
-            if f"{day}" not in main["data"][f"{uuid}"]:
-                main["data"][f'{uuid}'][f'{day}'] = 0
+                # if there isn't a value for today's day in the uuid struct,
+                # set the value to 0
+                if f"{day}" not in main["data"][f"{uuid}"]:
+                    main["data"][f'{uuid}'][f'{day}'] = 0
 
-            main["data"][f'{uuid}'][f'{day}'] += 1
+                main["data"][f'{uuid}'][f'{day}'] += 1
 
-            # for all the days in the uuid struct, add the value to the messages variable
-            for days in main["data"][f"{uuid}"]:
-                messages += main["data"][f"{uuid}"][f"{days}"]
+                # for all the days in the uuid struct, add the value to the messages variable
+                for days in main["data"][f"{uuid}"]:
+                    messages += main["data"][f"{uuid}"][f"{days}"]
 
-            # fetch the role we want to assign
-            regular = discord.utils.get((await ctx.guild.fetch_roles()),
-                                        name=main["settings"]["regular_role"])
-            # regular = discord.utils.get((await ctx.guild.fetch_roles()), name='tadpoles')
+                # fetch the role we want to assign
+                regular = discord.utils.get((await ctx.guild.fetch_roles()),
+                                            name=main["settings"]["regular_role"])
+                # regular = discord.utils.get((await ctx.guild.fetch_roles()), name='tadpoles')
 
-            # if they have sent over 125 messages in the last week, and do not already
-            # have the regular role, give it to them
-            if messages > main["settings"]["regular_amount"] and regular not in ctx.author.roles:
-                await ctx.author.add_roles(regular)
+                # if they have sent over 125 messages in the last week, and do not already
+                # have the regular role, give it to them
+                if messages > main["settings"]["regular_amount"] and regular not in ctx.author.roles:
+                    await ctx.author.add_roles(regular)
 
-            elif messages < main["settings"]["regular_amount"] and regular in ctx.author.roles:
-                await ctx.author.remove_roles(regular)
+                elif messages < main["settings"]["regular_amount"] and regular in ctx.author.roles:
+                    await ctx.author.remove_roles(regular)
 
-            # write the json data to the file
-            with open(f"data_files/{ctx.guild.id}.json", "w") as f:
-                json.dump(main, f)
+                # write the json data to the file
+                with open(f"data_files/{ctx.guild.id}.json", "w") as f:
+                    json.dump(main, f)
 
     @commands.command(name="flip", help="Flips a coin.  That's it.")
     async def flip(self, ctx):

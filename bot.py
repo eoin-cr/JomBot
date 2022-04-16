@@ -3,6 +3,7 @@ import os
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+import json
 
 intents = discord.Intents.default()
 intents.members = True
@@ -12,11 +13,60 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GOOGLE_KEY = os.getenv('GOOGLE_API')
 GOOGLE_ID = os.getenv('GOOGLE_ID')
 
+default_prefixes = ["!", '<:chigmn2:829382748631203901> ', "<@820065836139675668> "]
+
+
+# just a function to allow per-server prefixes
+async def determine_prefix(bot, message):
+    guild = message.guild
+    # if the message was sent in a guild, continue
+    if guild:
+        # print("two")
+        # creates the directory and file to store the prefixes if it doesn't
+        # already exist
+        if not os.path.exists('data_files'):
+            os.makedirs('data_files')
+
+        if not os.path.exists(f'data_files/prefixes.json'):
+            os.mknod(f'data_files/prefixes.json')
+
+            with open(f"data_files/prefixes.json", "w") as f:
+                main = {}
+                json.dump(main, f)
+                # print("defaults")
+
+                # if the file doesn't exist, it's impossible for there to be
+                # any non-default prefixes, so just return the default ones
+                return default_prefixes
+
+        # Open the prefixes file and read the data to `main`
+        with open(f"data_files/prefixes.json") as f:
+            main = json.load(f)
+            # print(f"main: {main}")
+            # print(f"id: {guild.id}")
+            # checks if there's an entry for this guild in the data
+            if f"{guild.id}" in main:
+                # if there is, set the prefix for that server's custom prefix
+                prefix = main[f"{guild.id}"]["prefix"]
+                # print("yes")
+                return prefix
+
+            # print("nope")
+
+            # otherwise if there is no entry for that server, just return
+            # the default prefixes
+            return default_prefixes
+
+    # if a message wasn't sent in a guild, simply return the default prefixes
+    else:
+        # print("else")
+        return default_prefixes
+
+
 # The prefix is either ! or a little chicken emoji.  How fun :)
 # You can also simply mention JomBot in order to run a command.  This is
 # helpful in case you forget what the prefix is
-bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> ', "<@820065836139675668> "],
-                   intents=intents)
+bot = commands.Bot(command_prefix=determine_prefix, intents=intents)
 
 
 def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
@@ -53,6 +103,7 @@ bot.load_extension("cogs.netsoc")
 bot.load_extension("cogs.hh")
 # bot.load_extension("cogs.test")
 bot.load_extension("cogs.translate")
+bot.load_extension("cogs.control")
 
 # Runs the bot using a .env stored bot token
 bot.run(TOKEN)
