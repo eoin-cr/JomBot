@@ -25,7 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed issue where print function was missing ctx.
+Added ability to mention jombot instead of using a prefix.
 
 ---
 

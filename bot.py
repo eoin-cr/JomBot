@@ -13,7 +13,10 @@ GOOGLE_KEY = os.getenv('GOOGLE_API')
 GOOGLE_ID = os.getenv('GOOGLE_ID')
 
 # The prefix is either ! or a little chicken emoji.  How fun :)
-bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> '], intents=intents)
+# You can also simply mention JomBot in order to run a command.  This is
+# helpful in case you forget what the prefix is
+bot = commands.Bot(command_prefix=["!", '<:chigmn2:829382748631203901> ', "<@820065836139675668> "],
+                   intents=intents)
 
 
 def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
