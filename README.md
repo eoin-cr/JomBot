@@ -149,6 +149,32 @@ All required values will be in square brackets, any optional values will be in
 round brackets. Any commands that will not run if you invite the bot to your
 server will be indicated with an asterisks in front of the prefix.
 
+### Control
+
+This cog will be responsible for controlling some of the functionality of the
+bot on different servers. At the moment it just controls the custom prefix
+stuff.
+
+```python
+!set-prefix/set_prefix [prefix]
+```
+
+- Sets a custom prefix for JomBot on your server
+
+```python
+!prefix
+```
+
+- Displays the currently set prefix for JomBot on your server
+
+```python
+!del-prefix
+```
+
+- Deletes your custom prefix and reverts it back to the default—`!`
+
+---
+
 ### Crypto
 
 The crypto cog was built after someone who was interested in crypto asked for a
