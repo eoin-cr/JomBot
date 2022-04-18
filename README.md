@@ -25,9 +25,11 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added ability to vote on whether the sentiment analysis was correct, which
-is then added to the csv file to improve the sample set. The updated
-sample set will have no effect until the bot is restarted though
+Fixed issue where commas were getting added to the csv file.
+Added ability to retrain the sentiment analysis through a discord command, 
+rather than having to restart the bot. Also reduced the amount of epochs
+to avoid overtraining. I will work on reducing the val_loss in further
+commits
 
 ---
 
@@ -360,8 +362,14 @@ This cog was created after some people requested a system to automatically
 filter people based on political beliefs—specifically their opinions towards
 billionaires.  NOTE: The opinions in `Billionaire_samples.csv` are not my own,
 they are just a wide range of different opinions gathered from people and
-manually sorted by pro/anti-billionaire sentiment.  At the moment, it is not
-integrated with any discord commands, and is simply a standalone python script.
+manually sorted by pro/anti-billionaire sentiment.
+
+```python
+!analyse [sentence]
+```
+
+- Analyses a sentence and determines whether it has a pro or anti billionaire
+  sentiment
 
 
 ### Song
