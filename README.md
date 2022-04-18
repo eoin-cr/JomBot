@@ -25,8 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed command which displays prefix—the error arose from checking for
-`ctx.guild.id` in the file, rather than `f"{ctx.guild.id}"`.
+Added sentiment analysis to check if a user likes billionaires or not.
 
 ---
 
@@ -352,6 +351,16 @@ commands will run universally.
   messaging the intro channel
 
 ---
+
+### Sentiment
+
+This cog was created after some people requested a system to automatically
+filter people based on political beliefs—specifically their opinions towards
+billionaires.  NOTE: The opinions in `Billionaire_samples.csv` are not my own,
+they are just a wide range of different opinions gathered from people and
+manually sorted by pro/anti-billionaire sentiment.  At the moment, it is not
+integrated with any discord commands, and is simply a standalone python script.
+
 
 ### Song
 

@@ -32,7 +32,8 @@ class Translate(commands.Cog):
         print("Translate initialised")
         # self.translator = Translator()
 
-    @commands.command()
+    @commands.command(name="translate", help="Translate the message that "
+                                             "you're replying to into English")
     async def translate(self, ctx):
         reply_message = ctx.message.reference.resolved.content
         # calls the google translate function
