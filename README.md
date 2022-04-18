@@ -25,7 +25,10 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added sentiment analysis to check if a user likes billionaires or not.
+Added sentiment analysis to check if a user likes billionaires or not.  Added
+command so it can be run in servers to see. Will work on building functionality
+into the command that lets people speak in general to integrate with the
+checker automatically later.
 
 ---
 

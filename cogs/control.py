@@ -8,7 +8,7 @@ import bot as main
 class Control(commands.Cog):
     def __int__(self, bot):
         self.bot = bot
-        print("Control initialised")
+        print("Hello Control initialised")
 
     @commands.command(name="set-prefix",
                       alias="set_prefix", help="Sets custom prefix for your "
