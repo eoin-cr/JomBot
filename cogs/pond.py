@@ -4,6 +4,7 @@ from discord.ext import commands
 import random
 import asyncio
 import bot as main
+# from cogs.sentiment import predict_sentiment
 
 
 def pond_check():

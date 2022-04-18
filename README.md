@@ -25,10 +25,9 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added sentiment analysis to check if a user likes billionaires or not.  Added
-command so it can be run in servers to see. Will work on building functionality
-into the command that lets people speak in general to integrate with the
-checker automatically later.
+Added ability to vote on whether the sentiment analysis was correct, which
+is then added to the csv file to improve the sample set. The updated
+sample set will have no effect until the bot is restarted though
 
 ---
 

@@ -64,6 +64,7 @@ print(model.summary())
 
 history = model.fit(padded_sequence, sentiment_label[0], validation_split=0.2,
                     epochs=70, batch_size=10)
+                    # epochs = 5, batch_size = 10)
 
 plt.plot(history.history['accuracy'], label='acc')
 plt.plot(history.history['val_accuracy'], label='val_acc')
@@ -78,6 +79,7 @@ plt.plot(history.history['val_loss'], label='val_loss')
 plt.legend()
 plt.show()
 
+
 # plt.savefig("Loss_plt.jpg")
 
 def predict_sentiment(text):
@@ -86,6 +88,7 @@ def predict_sentiment(text):
     prediction = int(model.predict(tx).round().item())
     # print("Predicted label: ", sentiment_label[1][prediction])
     return sentiment_label[1][prediction]
+
 
 test_sentence1 = "I love billionaires"
 predict_sentiment(test_sentence1)
@@ -102,6 +105,7 @@ predict_sentiment("They're pretty dope people who are overhated")
 predict_sentiment("I'm sick of socialists nowadays hating on billionares, they earned their money")
 predict_sentiment("Billionaire moment")
 
+
 class Sentiment(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -109,15 +113,75 @@ class Sentiment(commands.Cog):
 
     @commands.command(name="analyse", help="Performs sentiment analysis")
     async def analyse(self, ctx, *text):
-        text_str = ' '.join(text)
+        text_str = ' '.join(text).replace("'", "")
         sentiment = predict_sentiment(text_str)
+        # sentiment = 1
         if sentiment == 1:
             string = "anti billionaire"
         else:
             string = "pro billionaire"
-        embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string has {string}"
+
+        emojis = ['✅', '❌']
+        embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string \"{text_str}\" "
+                                                      f"has {string}"
                                                       f" sentiment")
-        await ctx.send(embed=embed)
+        message = await ctx.send(embed=embed)
+        for emoji in emojis:
+            await message.add_reaction(emoji)
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        if user.bot:
+            return
+
+        # embed = reaction.embeds[0]
+        # print(embed)
+        # print(reaction.message)
+        # print(reaction.message.embeds)
+        message = reaction.message
+        # print(message)
+        embed = message.embeds
+        # print(embed[0].fields)
+        # print(embed[0].fields[0].value)
+        val = embed[0].fields[0].value
+        # print(val)
+        val = val.split('"')
+        # print(val)
+        text = val[1]
+        # print(text)
+        emoji = reaction.emoji
+
+
+        # if emoji == "emoji 1":
+        #     fixed_channel = self.bot.get_channel(ctx.channel.id)
+        #     await fixed_channel.send(embed=embed)
+
+        if emoji == '✅':
+            # print(str(val[2][5:]))
+            if str(val[2][5:]).startswith("anti"):
+                correct_sentiment = 5
+            else:
+                correct_sentiment = 1
+        elif emoji == '❌':
+            if str(val[2][5:]).startswith("anti"):
+                correct_sentiment = 1
+            else:
+                correct_sentiment = 5
+        else:
+            return
+
+        # print(f"text: {text}")
+        # print(f"correct sentiment: {correct_sentiment}")
+
+        with open('Billionaire_samples.csv') as f:
+            data = f.read()
+            if text in data:
+                # print("text already in file")
+                return
+
+        with open('Billionaire_samples.csv', "a") as f:
+            f.write(f"{correct_sentiment}, {text}\n")
+
 
 
 
