@@ -25,7 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added ability to detect transphobic remarks + the sample set for that.
+Updated readme, fixed some dependency stuff
 
 ---
 
@@ -53,6 +53,12 @@ Then for the sentiment analyser normalisation function you'll need to run
 
 ```python
 python -m spacy download en_core_web_sm
+```
+
+And then install ffmpeg on whatever version of linux you're using. For Ubuntu
+the command is
+```python
+sudo apt install ffmpeg
 ```
 
 Then to run the bot you'll want to simply run `python3 bot.py` and it should be

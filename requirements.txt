@@ -14,3 +14,4 @@ tensorflow
 symspellpy
 spacy
 tqdm
+discord.py[voice]

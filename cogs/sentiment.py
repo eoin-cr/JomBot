@@ -254,8 +254,9 @@ def train(i):
         keras.callbacks.EarlyStopping(patience=2)
     ]
 
-    history = model.fit(padded_sequence, sentiment_label[0], validation_split=0.2,
+    history = model.fit(padded_sequence, sentiment_label[i], validation_split=0.2,
                         epochs=15, batch_size=50, callbacks=my_callbacks)
+                        # epochs = 50, batch_size = 50)
     # epochs=5, batch_size=10)
 
     plt.plot(history.history['accuracy'], label='acc')
@@ -319,7 +320,7 @@ class Sentiment(commands.Cog):
         for emoji in emojis:
             await message.add_reaction(emoji)
 
-    @commands.command(name="analyse_t", help="Performs sentiment analysis")
+    @commands.command(name="analyse_t", alias="tranalyse", help="Performs sentiment analysis")
     async def analyse_t(self, ctx, *, text):
         # text_str = ' '.join(text).replace("'", "")
         text_str = remove_punctuation(text).replace("\n", "")
@@ -483,7 +484,7 @@ class Sentiment(commands.Cog):
 
                 # If a user has any of the 3 roles, ignore their message
                 # if not (
-                #         role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
+                # role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
                 # ch = message.guild.get_channel(829349688197120052)
                 ch = message.guild.get_channel(829358413065486376)
                 # print(message.guild.roles)
