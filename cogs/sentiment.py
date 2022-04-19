@@ -20,6 +20,13 @@ from bot import embed_func
 import string
 
 
+def pond_check():
+    def predicate(ctx):
+        return ctx.guild.id == 829349685667430460
+
+    return commands.check(predicate)
+
+
 # quick note about the two tokenizer arrays: as I want to train the code on two different
 # sample sets to calculate different things, but don't want to duplicate any code, I've
 # simply created an array which stores the models, tokens, etc.  The 0th value of the
@@ -201,7 +208,7 @@ def normalization_pipeline(sentences):
     return sentences
 
 
-def train(i):
+def train(i, batch):
     df = pd.read_csv(samples_arr[i])
     print(df.head())
 
@@ -254,9 +261,9 @@ def train(i):
         keras.callbacks.EarlyStopping(patience=2)
     ]
 
-    history = model.fit(padded_sequence, sentiment_label[i], validation_split=0.2,
-                        epochs=15, batch_size=50, callbacks=my_callbacks)
-                        # epochs = 50, batch_size = 50)
+    history = model.fit(padded_sequence, sentiment_label[0], validation_split=0.2,
+                        epochs=15, batch_size=batch, callbacks=my_callbacks)
+    # epochs = 50, batch_size = 50)
     # epochs=5, batch_size=10)
 
     plt.plot(history.history['accuracy'], label='acc')
@@ -297,8 +304,9 @@ class Sentiment(commands.Cog):
         sentiment_label_arr = [None, None]
         global samples_arr
         samples_arr = ['Billionaire_samples.csv', 'trans_samples.csv']
-        train(0)
-        train(1)
+        train(0, 5)
+        train(1, 50)
+        self.invites_disabled = False
         print("Sentiment analysis initialised")
 
     @commands.command(name="analyse", help="Performs sentiment analysis")
@@ -406,57 +414,94 @@ class Sentiment(commands.Cog):
             embed2 = embed_func(ctx, "Retrained", "The sentiment analysis "
                                                   "has finished retraining!")
             await ctx.send(embed=embed, delete_after=1)
-            train(0)
-            train(1)
+            train(0, 5)
+            train(1, 50)
             await ctx.send(embed=embed2)
+
+    @commands.command(name="disable-introductions", alias="disable_introductions",
+                      brief="Locks introductions",
+                      help="Disables functionality that lets people "
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def disable_introductions(self, ctx):
+        embed = embed_func(ctx, "Locked down", "Messages sent in introductions will now"
+                                                    " no longer let the user speak in general.")
+        self.invites_disabled = True
+        await ctx.send(embed=embed)
+
+    @commands.command(name="enable-introductions", alias="enable_introductions",
+                      brief="Unlocks introductions",
+                      help="Enables functionality that lets people"
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def enable_introductions(self, ctx):
+        embed = embed_func(ctx, "Lock down lifted", "Messages sent in introductions will now"
+                                                    " let the user speak in general.")
+        self.invites_disabled = False
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id == 829355854582906930 and message.author.id != 820065836139675668:
-        # if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
+        if (message.channel.id == 830565670805962822 and message.author.id != 820065836139675668
+                and "7" in message.content and "8" in message.content and not self.invites_disabled):
+            # if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
             role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
             role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
             role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
 
-            # If a user has any of the 3 roles, ignore their message
-            if not(role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
-                ch = message.guild.get_channel(829349688197120052)
-                # ch = message.guild.get_channel(829358413065486376)
-                # print(message.guild.roles)
-                await message.author.add_roles(role1)
-                # await message.author.add_roles(message.author, role)
-                embed = embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
-                await ch.send(embed=embed)
+            content = message.content
+            # print(content)
+            content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
+            # print(content)
+            # content = content.split("7")
+            content = content[1].split("8")
+            # print(content)
+            content2 = content[1][1:].replace("\n", "")
+            # print(content2)
+            content = content[0][1:].replace("\n", "")
+            # print(content)
+            # print(content)
 
-                # Sends a message mentioning the user and then deletes it after 1 second because
-                # discord embeds don't notify someone if they've been tagged.
-                await ch.send(message.author.mention, delete_after=1)
+            if predict_sentiment(content, 0) != 1 or predict_sentiment(content2, 1) != 1:
+                if predict_sentiment(content, 0) != 1 and predict_sentiment(content2, 1) != 1:
+                    reason = "pro-billionaire and anti-trans"
+                    output = f"{content}\" and \"{content2}"
 
-                if (message.channel.id == 829358413065486376 or message.channel.id == 829355854582906930
-                        and "7" in message.content and "8" in message.content):
-                    content = message.content
-                    # print(content)
-                    content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
-                    # print(content)
-                    # content = content.split("7")
-                    content = content[1].split("8")
-                    content = content[0][1:].replace("\n", "")
-                    # print(content)
+                elif predict_sentiment(content, 0) != 1:
+                    reason = "pro-billionaire"
+                    output = content
 
-                    if predict_sentiment(content, 0) != 1:
-                        channel = message.guild.get_channel(829358413065486376)
-                        embed = embed_func(message, "Manual review",
-                                                f"{message.author.name}#{message.author.discriminator}'s"
-                                                f" introduction message\n"
-                                                f" \"{message.content}\" \nhas been held for manual "
-                                                f"review due to detected pro billionaire sentiment "
-                                                f"from the line \"{content}\".  \nReact with ✅ to let "
-                                                f"them in, otherwise, they will not be let in.")
-                        await message.add_reaction("🤨")
-                        await channel.send(embed=embed)
-                    else:
-                        print("accepted")
+                elif predict_sentiment(content2, 1) != 1:
+                    reason = "anti-trans"
+                    output = content2
 
+                channel = message.guild.get_channel(829355854582906930)
+                embed = embed_func(message, "Manual review",
+                                   f"{message.author.name}#{message.author.discriminator}'s"
+                                   f" introduction message\n"
+                                   f" \"{message.content}\" \nhas been held for manual "
+                                   f"review due to detected {reason} sentiment "
+                                   f"from the line \"{output}\".  \nReact with ✅ to let "
+                                   f"them in, otherwise, they will not be let in.")
+                await message.add_reaction("🤨")
+                await channel.send(embed=embed)
+            else:
+                # If a user has any of the 3 roles, ignore their message
+                if not (role1 in message.author.roles or role2 in message.author.roles
+                        or role3 in message.author.roles):
+                    ch = message.guild.get_channel(829349688197120052)
+                    # ch = message.guild.get_channel(829358413065486376)
+                    # print(message.guild.roles)
+                    await message.author.add_roles(role1)
+                    # await message.author.add_roles(message.author, role)
+                    embed = embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
+                    await ch.send(embed=embed)
+
+                    # Sends a message mentioning the user and then deletes it after 1 second because
+                    # discord embeds don't notify someone if they've been tagged.
+                    await ch.send(message.author.mention, delete_after=1)
+
+                # print("accepted")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):

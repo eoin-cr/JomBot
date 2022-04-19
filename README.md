@@ -25,7 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Updated readme, fixed some dependency stuff
+Fully created introductions channel linking with the model.
 
 ---
 
