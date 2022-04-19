@@ -382,7 +382,8 @@ class Sentiment(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
+        if message.channel.id == 829355854582906930 and message.author.id != 820065836139675668:
+        # if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
             role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
             role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
             role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
@@ -401,30 +402,30 @@ class Sentiment(commands.Cog):
                 # discord embeds don't notify someone if they've been tagged.
                 await ch.send(message.author.mention, delete_after=1)
 
-        if (message.channel.id == 829358413065486376 or message.channel.id == 829355854582906930
-                and "7" in message.content and "8" in message.content):
-            content = message.content
-            # print(content)
-            content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
-            # print(content)
-            # content = content.split("7")
-            content = content[1].split("8")
-            content = content[0][1:].replace("\n", "")
-            print(content)
+                if (message.channel.id == 829358413065486376 or message.channel.id == 829355854582906930
+                        and "7" in message.content and "8" in message.content):
+                    content = message.content
+                    # print(content)
+                    content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
+                    # print(content)
+                    # content = content.split("7")
+                    content = content[1].split("8")
+                    content = content[0][1:].replace("\n", "")
+                    print(content)
 
-            if predict_sentiment(content) != 1:
-                channel = message.guild.get_channel(829358413065486376)
-                embed = embed_func(message, "Manual review",
-                                        f"{message.author.name}#{message.author.discriminator}'s"
-                                        f" introduction message\n"
-                                        f" \"{message.content}\" \nhas been held for manual "
-                                        f"review due to detected pro billionaire sentiment "
-                                        f"from the line \"{content}\".  \nReact with ✅ to let "
-                                        f"them in, otherwise, they will not be let in.")
-                await message.add_reaction("🤨")
-                await channel.send(embed=embed)
-            else:
-                print("accepted")
+                    if predict_sentiment(content) != 1:
+                        channel = message.guild.get_channel(829358413065486376)
+                        embed = embed_func(message, "Manual review",
+                                                f"{message.author.name}#{message.author.discriminator}'s"
+                                                f" introduction message\n"
+                                                f" \"{message.content}\" \nhas been held for manual "
+                                                f"review due to detected pro billionaire sentiment "
+                                                f"from the line \"{content}\".  \nReact with ✅ to let "
+                                                f"them in, otherwise, they will not be let in.")
+                        await message.add_reaction("🤨")
+                        await channel.send(embed=embed)
+                    else:
+                        print("accepted")
 
 
     @commands.Cog.listener()
