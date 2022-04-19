@@ -1,10 +1,10 @@
 # pond.py
+import re
 import discord
 from discord.ext import commands
 import random
 import asyncio
 import bot as main
-# from cogs.sentiment import predict_sentiment
 
 
 def pond_check():
@@ -36,28 +36,29 @@ class Pond(commands.Cog):
         if message.guild is not None and message.guild.id == 829349685667430460:
             # Checks if a message was sent in the introductions channel
             # if message.channel.id == 829358413065486376:
-            if message.channel.id == 830565670805962822 and not self.invites_disabled:
-                role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
-                role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
-                role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
+            # if message.channel.id == 830565670805962822 and not self.invites_disabled:
+            #     role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
+            #     role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
+            #     role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
+            #
+            #     # If a user has any of the 3 roles, ignore their message
+            #     if role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles:
+            #         print("ignoring")
+            #
+            #     # Otherwise, give them the tadpole role so they can speak
+            #     else:
+            #         ch = message.guild.get_channel(829349688197120052)
+            #         # ch = message.guild.get_channel(829358413065486376)
+            #         # print(message.guild.roles)
+            #         await message.author.add_roles(role1)
+            #         # await message.author.add_roles(message.author, role)
+            #         embed = main.embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
+            #         await ch.send(embed=embed)
+            #
+            #         # Sends a message mentioning the user and then deletes it after 1 second because
+            #         # discord embeds don't notify someone if they've been tagged.
+            #         await ch.send(message.author.mention, delete_after=1)
 
-                # If a user has any of the 3 roles, ignore their message
-                if role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles:
-                    print("ignoring")
-
-                # Otherwise, give them the tadpole role so they can speak
-                else:
-                    ch = message.guild.get_channel(829349688197120052)
-                    # ch = message.guild.get_channel(829358413065486376)
-                    # print(message.guild.roles)
-                    await message.author.add_roles(role1)
-                    # await message.author.add_roles(message.author, role)
-                    embed = main.embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
-                    await ch.send(embed=embed)
-
-                    # Sends a message mentioning the user and then deletes it after 1 second because
-                    # discord embeds don't notify someone if they've been tagged.
-                    await ch.send(message.author.mention, delete_after=1)
 
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")

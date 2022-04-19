@@ -25,11 +25,10 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed issue where commas were getting added to the csv file.
-Added ability to retrain the sentiment analysis through a discord command, 
-rather than having to restart the bot. Also reduced the amount of epochs
-to avoid overtraining. I will work on reducing the val_loss in further
-commits
+Added automatic cutoff to the training when over-training is being detected.
+Also added function to scan introduction messages, and automatically
+flag ones with disliked sentiments, and then send them to a specific channel
+for manual authorisation.
 
 ---
 
@@ -51,6 +50,12 @@ Now you have to download all the libraries required. To do that run the command
 
 ```python
 pip install -r requirements.txt
+```
+
+Then for the sentiment analyser normalisation function you'll need to run
+
+```python
+python -m spacy download en_core_web_sm
 ```
 
 Then to run the bot you'll want to simply run `python3 bot.py` and it should be
