@@ -255,7 +255,7 @@ def train(i):
     ]
 
     history = model.fit(padded_sequence, sentiment_label[0], validation_split=0.2,
-                        epochs=15, batch_size=10, callbacks=my_callbacks)
+                        epochs=15, batch_size=50, callbacks=my_callbacks)
     # epochs=5, batch_size=10)
 
     plt.plot(history.history['accuracy'], label='acc')
@@ -297,6 +297,7 @@ class Sentiment(commands.Cog):
         global samples_arr
         samples_arr = ['Billionaire_samples.csv', 'trans_samples.csv']
         train(0)
+        train(1)
         print("Sentiment analysis initialised")
 
     @commands.command(name="analyse", help="Performs sentiment analysis")
@@ -313,6 +314,25 @@ class Sentiment(commands.Cog):
         emojis = ['✅', '❌']
         embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string \"{text_str}\" "
                                                       f"has {string}"
+                                                      f" sentiment")
+        message = await ctx.send(embed=embed)
+        for emoji in emojis:
+            await message.add_reaction(emoji)
+
+    @commands.command(name="analyse_t", help="Performs sentiment analysis")
+    async def analyse_t(self, ctx, *, text):
+        # text_str = ' '.join(text).replace("'", "")
+        text_str = remove_punctuation(text).replace("\n", "")
+        sentiment = predict_sentiment(text_str, 1)
+        # sentiment = 1
+        if sentiment == 1:
+            string = "does not have anti trans"
+        else:
+            string = "has anti trans"
+
+        emojis = ['✅', '❌']
+        embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string \"{text_str}\" "
+                                                      f"{string}"
                                                       f" sentiment")
         message = await ctx.send(embed=embed)
         for emoji in emojis:
@@ -347,27 +367,32 @@ class Sentiment(commands.Cog):
         if emoji == '✅':
             # print(str(val[2][5:]))
             if str(val[2][5:]).startswith("anti"):
-                correct_sentiment = 1
-            else:
                 correct_sentiment = 0
+            else:
+                correct_sentiment = 1
         elif emoji == '❌':
             if str(val[2][5:]).startswith("anti"):
-                correct_sentiment = 0
-            else:
                 correct_sentiment = 1
+            else:
+                correct_sentiment = 0
         else:
             return
+
+        if str(val[2]).__contains__("trans"):
+            i = 1
+        else:
+            i = 0
 
         # print(f"text: {text}")
         # print(f"correct sentiment: {correct_sentiment}")
 
-        with open('Billionaire_samples.csv') as f:
+        with open(samples_arr[i]) as f:
             data = f.read()
             if text in data:
                 # print("text already in file")
                 return
 
-        with open('Billionaire_samples.csv', "a") as f:
+        with open(samples_arr[i], "a") as f:
             f.write(f"{correct_sentiment}, {text}\n")
 
     @commands.command(name="retrain", alias="re-train", help="Retrains the "
@@ -381,6 +406,7 @@ class Sentiment(commands.Cog):
                                                   "has finished retraining!")
             await ctx.send(embed=embed, delete_after=1)
             train(0)
+            train(1)
             await ctx.send(embed=embed2)
 
     @commands.Cog.listener()

@@ -25,9 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Updated sample set to just use 0/1, rather than a 1-5 scale.  Also added
-array to store the training results so we can implement more sample
-sets for different predictions.
+Added ability to detect transphobic remarks + the sample set for that.
 
 ---
 
