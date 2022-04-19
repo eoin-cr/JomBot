@@ -20,6 +20,13 @@ from bot import embed_func
 import string
 
 
+# quick note about the two tokenizer arrays: as I want to train the code on two different
+# sample sets to calculate different things, but don't want to duplicate any code, I've
+# simply created an array which stores the models, tokens, etc.  The 0th value of the
+# arrays refers to the billionaire sample set, the 1st value refers to the trans sample
+# set
+
+
 def remove_punctuation(text):
     new_string = text.translate(str.maketrans('', '', string.punctuation))
 
@@ -107,7 +114,8 @@ def spell_correction(sentence_list):
 
 def _spell_correction_text(text, spellchecker):
     """
-    This function does very simple spell correction normalization using pyspellchecker module. It works over a tokenized sentence and only the token representations are changed.
+    This function does very simple spell correction normalization using pyspellchecker module.
+    It works over a tokenized sentence and only the token representations are changed.
     """
     if len(text) < 1:
         return ""
@@ -193,18 +201,18 @@ def normalization_pipeline(sentences):
     return sentences
 
 
-def train():
-    df = pd.read_csv('Billionaire_samples.csv')
+def train(i):
+    df = pd.read_csv(samples_arr[i])
     print(df.head())
 
     # assign reviews with score > 3 as positive sentiment
     # score < 3 negative sentiment
     # remove score = 3df = df[df['Score'] != 3]
-    df['sentiment'] = df['Score'].apply(lambda rating: +1 if rating > 3 else -1)
+    df['sentiment'] = df['Score'].apply(lambda rating: +1 if rating == 1 else -1)
 
     # split df - positive and negative sentiment:
-    positive = df[df['sentiment'] == 1]
-    negative = df[df['sentiment'] == -1]
+    # positive = df[df['sentiment'] == 1]
+    # negative = df[df['sentiment'] == -1]
 
     df['Text'] = normalization_pipeline(df['Text'])
     dfNew = df[['Text', 'sentiment']]
@@ -213,13 +221,13 @@ def train():
 
     # print(dfNew['sentiment'].value_counts())
 
-    global sentiment_label
+    # global sentiment_label_arr
     sentiment_label = dfNew.sentiment.factorize()
     # print(sentiment_label)
 
     text = dfNew.Text.values
 
-    global tokenizer
+    # global tokenizer_arr
     tokenizer = Tokenizer(num_words=100)
     tokenizer.fit_on_texts(text)
     # tokenizer = normalization_pipeline(tokenizer)
@@ -229,7 +237,7 @@ def train():
     padded_sequence = pad_sequences(encoded_docs, maxlen=700)
 
     embedding_vector_length = 32
-    global model
+    # global model_arr
     model = Sequential()
     vocab_size = len(tokenizer.word_index) + 1
     model.add(Embedding(vocab_size, embedding_vector_length, input_length=700))
@@ -264,43 +272,38 @@ def train():
     plt.show()
 
     # plt.savefig("Loss_plt.jpg")
+    tokenizer_arr[i] = tokenizer
+    model_arr[i] = model
+    sentiment_label_arr[i] = sentiment_label
 
 
-def predict_sentiment(text):
-    tx = tokenizer.texts_to_sequences([text])
+def predict_sentiment(text, i):
+    tx = tokenizer_arr[i].texts_to_sequences([text])
     tx = pad_sequences(tx, maxlen=700)
-    prediction = int(model.predict(tx).round().item())
+    prediction = int(model_arr[i].predict(tx).round().item())
     # print("Predicted label: ", sentiment_label[1][prediction])
-    return sentiment_label[1][prediction]
-
-
-# test_sentence1 = "I love billionaires"
-# predict_sentiment(test_sentence1)
-#
-# test_sentence2 = "I fucking hate them so goddamn much fucking hell."
-# predict_sentiment(test_sentence2)
-#
-# predict_sentiment("I love billionaires so much")
-# predict_sentiment("I fucking hate billionaires")
-# predict_sentiment("They're awful people")
-# predict_sentiment("They're awful people who exploit the working class")
-# predict_sentiment("They're good people who provide jobs")
-# predict_sentiment("They're pretty dope people who are overhated")
-# predict_sentiment("I'm sick of socialists nowadays hating on billionares, they earned their money")
-# predict_sentiment("Billionaire moment")
+    return sentiment_label_arr[i][1][prediction]
 
 
 class Sentiment(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        train()
+        global tokenizer_arr
+        tokenizer_arr = [None, None]
+        global model_arr
+        model_arr = [None, None]
+        global sentiment_label_arr
+        sentiment_label_arr = [None, None]
+        global samples_arr
+        samples_arr = ['Billionaire_samples.csv', 'trans_samples.csv']
+        train(0)
         print("Sentiment analysis initialised")
 
     @commands.command(name="analyse", help="Performs sentiment analysis")
     async def analyse(self, ctx, *, text):
         # text_str = ' '.join(text).replace("'", "")
         text_str = remove_punctuation(text).replace("\n", "")
-        sentiment = predict_sentiment(text_str)
+        sentiment = predict_sentiment(text_str, 0)
         # sentiment = 1
         if sentiment == 1:
             string = "anti billionaire"
@@ -344,14 +347,14 @@ class Sentiment(commands.Cog):
         if emoji == '✅':
             # print(str(val[2][5:]))
             if str(val[2][5:]).startswith("anti"):
-                correct_sentiment = 5
-            else:
                 correct_sentiment = 1
+            else:
+                correct_sentiment = 0
         elif emoji == '❌':
             if str(val[2][5:]).startswith("anti"):
-                correct_sentiment = 1
+                correct_sentiment = 0
             else:
-                correct_sentiment = 5
+                correct_sentiment = 1
         else:
             return
 
@@ -377,7 +380,7 @@ class Sentiment(commands.Cog):
             embed2 = embed_func(ctx, "Retrained", "The sentiment analysis "
                                                   "has finished retraining!")
             await ctx.send(embed=embed, delete_after=1)
-            train()
+            train(0)
             await ctx.send(embed=embed2)
 
     @commands.Cog.listener()
@@ -411,9 +414,9 @@ class Sentiment(commands.Cog):
                     # content = content.split("7")
                     content = content[1].split("8")
                     content = content[0][1:].replace("\n", "")
-                    print(content)
+                    # print(content)
 
-                    if predict_sentiment(content) != 1:
+                    if predict_sentiment(content, 0) != 1:
                         channel = message.guild.get_channel(829358413065486376)
                         embed = embed_func(message, "Manual review",
                                                 f"{message.author.name}#{message.author.discriminator}'s"
@@ -435,18 +438,18 @@ class Sentiment(commands.Cog):
 
         message = reaction.message
         embed = message.embeds
-        print(embed)
+        # print(embed)
         val = embed[0].fields[0].value
         title = embed[0].fields[0].name
-        print(val)
-        print(title)
+        # print(val)
+        # print(title)
         if title == "Manual review":
             emoji = reaction.emoji
 
             if emoji == '✅':
                 user = ((val.split("\n"))[0].split(" ")[0])[:-2]
-                print(1)
-                print(user)
+                # print(1)
+                # print(user)
                 member = message.guild.get_member_named(user)
                 role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
                 # role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
@@ -467,7 +470,7 @@ class Sentiment(commands.Cog):
                 # discord embeds don't notify someone if they've been tagged.
                 await ch.send(member.mention, delete_after=1)
             else:
-                print(2)
+                # print(2)
                 return
 
         # print(f"text: {text}")
