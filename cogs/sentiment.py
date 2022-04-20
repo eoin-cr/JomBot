@@ -27,6 +27,10 @@ def pond_check():
     return commands.check(predicate)
 
 
+def cleanemojis(string):
+    return re.sub(r"<a?:([a-zA-Z0-9_-]{1,32}):[0-9]{17,21}>", "", string)
+
+
 # quick note about the two tokenizer arrays: as I want to train the code on two different
 # sample sets to calculate different things, but don't want to duplicate any code, I've
 # simply created an array which stores the models, tokens, etc.  The 0th value of the
@@ -312,7 +316,7 @@ class Sentiment(commands.Cog):
     @commands.command(name="analyse", help="Performs sentiment analysis")
     async def analyse(self, ctx, *, text):
         # text_str = ' '.join(text).replace("'", "")
-        text_str = remove_punctuation(text).replace("\n", "")
+        text_str = remove_punctuation(cleanemojis(text)).replace("\n", "")
         sentiment = predict_sentiment(text_str, 0)
         # sentiment = 1
         if sentiment == 1:
@@ -331,7 +335,7 @@ class Sentiment(commands.Cog):
     @commands.command(name="analyse_t", alias="tranalyse", help="Performs sentiment analysis")
     async def analyse_t(self, ctx, *, text):
         # text_str = ' '.join(text).replace("'", "")
-        text_str = remove_punctuation(text).replace("\n", "")
+        text_str = remove_punctuation(cleanemojis(text)).replace("\n", "")
         sentiment = predict_sentiment(text_str, 1)
         # sentiment = 1
         if sentiment == 1:
@@ -449,7 +453,7 @@ class Sentiment(commands.Cog):
             role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
             role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
 
-            content = message.content
+            content = cleanemojis(message.content)
             # print(content)
             content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
             # print(content)
