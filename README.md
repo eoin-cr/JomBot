@@ -25,7 +25,8 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fully created introductions channel linking with the model.
+Fixed issue where emojis in the message would interfere with the results.
+Emojis now get automatically stripped from the message before analysing.
 
 ---
 
