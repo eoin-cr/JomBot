@@ -20,6 +20,20 @@ from bot import embed_func
 import string
 
 
+def pond_check():
+    def predicate(ctx):
+        return ctx.guild.id == 829349685667430460
+
+    return commands.check(predicate)
+
+
+# quick note about the two tokenizer arrays: as I want to train the code on two different
+# sample sets to calculate different things, but don't want to duplicate any code, I've
+# simply created an array which stores the models, tokens, etc.  The 0th value of the
+# arrays refers to the billionaire sample set, the 1st value refers to the trans sample
+# set
+
+
 def remove_punctuation(text):
     new_string = text.translate(str.maketrans('', '', string.punctuation))
 
@@ -107,7 +121,8 @@ def spell_correction(sentence_list):
 
 def _spell_correction_text(text, spellchecker):
     """
-    This function does very simple spell correction normalization using pyspellchecker module. It works over a tokenized sentence and only the token representations are changed.
+    This function does very simple spell correction normalization using pyspellchecker module.
+    It works over a tokenized sentence and only the token representations are changed.
     """
     if len(text) < 1:
         return ""
@@ -193,18 +208,18 @@ def normalization_pipeline(sentences):
     return sentences
 
 
-def train():
-    df = pd.read_csv('Billionaire_samples.csv')
+def train(i, batch):
+    df = pd.read_csv(samples_arr[i])
     print(df.head())
 
     # assign reviews with score > 3 as positive sentiment
     # score < 3 negative sentiment
     # remove score = 3df = df[df['Score'] != 3]
-    df['sentiment'] = df['Score'].apply(lambda rating: +1 if rating > 3 else -1)
+    df['sentiment'] = df['Score'].apply(lambda rating: +1 if rating == 1 else -1)
 
     # split df - positive and negative sentiment:
-    positive = df[df['sentiment'] == 1]
-    negative = df[df['sentiment'] == -1]
+    # positive = df[df['sentiment'] == 1]
+    # negative = df[df['sentiment'] == -1]
 
     df['Text'] = normalization_pipeline(df['Text'])
     dfNew = df[['Text', 'sentiment']]
@@ -213,13 +228,13 @@ def train():
 
     # print(dfNew['sentiment'].value_counts())
 
-    global sentiment_label
+    # global sentiment_label_arr
     sentiment_label = dfNew.sentiment.factorize()
     # print(sentiment_label)
 
     text = dfNew.Text.values
 
-    global tokenizer
+    # global tokenizer_arr
     tokenizer = Tokenizer(num_words=100)
     tokenizer.fit_on_texts(text)
     # tokenizer = normalization_pipeline(tokenizer)
@@ -229,7 +244,7 @@ def train():
     padded_sequence = pad_sequences(encoded_docs, maxlen=700)
 
     embedding_vector_length = 32
-    global model
+    # global model_arr
     model = Sequential()
     vocab_size = len(tokenizer.word_index) + 1
     model.add(Embedding(vocab_size, embedding_vector_length, input_length=700))
@@ -247,7 +262,8 @@ def train():
     ]
 
     history = model.fit(padded_sequence, sentiment_label[0], validation_split=0.2,
-                        epochs=15, batch_size=10, callbacks=my_callbacks)
+                        epochs=15, batch_size=batch, callbacks=my_callbacks)
+    # epochs = 50, batch_size = 50)
     # epochs=5, batch_size=10)
 
     plt.plot(history.history['accuracy'], label='acc')
@@ -264,43 +280,40 @@ def train():
     plt.show()
 
     # plt.savefig("Loss_plt.jpg")
+    tokenizer_arr[i] = tokenizer
+    model_arr[i] = model
+    sentiment_label_arr[i] = sentiment_label
 
 
-def predict_sentiment(text):
-    tx = tokenizer.texts_to_sequences([text])
+def predict_sentiment(text, i):
+    tx = tokenizer_arr[i].texts_to_sequences([text])
     tx = pad_sequences(tx, maxlen=700)
-    prediction = int(model.predict(tx).round().item())
+    prediction = int(model_arr[i].predict(tx).round().item())
     # print("Predicted label: ", sentiment_label[1][prediction])
-    return sentiment_label[1][prediction]
-
-
-# test_sentence1 = "I love billionaires"
-# predict_sentiment(test_sentence1)
-#
-# test_sentence2 = "I fucking hate them so goddamn much fucking hell."
-# predict_sentiment(test_sentence2)
-#
-# predict_sentiment("I love billionaires so much")
-# predict_sentiment("I fucking hate billionaires")
-# predict_sentiment("They're awful people")
-# predict_sentiment("They're awful people who exploit the working class")
-# predict_sentiment("They're good people who provide jobs")
-# predict_sentiment("They're pretty dope people who are overhated")
-# predict_sentiment("I'm sick of socialists nowadays hating on billionares, they earned their money")
-# predict_sentiment("Billionaire moment")
+    return sentiment_label_arr[i][1][prediction]
 
 
 class Sentiment(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        train()
+        global tokenizer_arr
+        tokenizer_arr = [None, None]
+        global model_arr
+        model_arr = [None, None]
+        global sentiment_label_arr
+        sentiment_label_arr = [None, None]
+        global samples_arr
+        samples_arr = ['Billionaire_samples.csv', 'trans_samples.csv']
+        train(0, 5)
+        train(1, 50)
+        self.invites_disabled = False
         print("Sentiment analysis initialised")
 
     @commands.command(name="analyse", help="Performs sentiment analysis")
     async def analyse(self, ctx, *, text):
         # text_str = ' '.join(text).replace("'", "")
         text_str = remove_punctuation(text).replace("\n", "")
-        sentiment = predict_sentiment(text_str)
+        sentiment = predict_sentiment(text_str, 0)
         # sentiment = 1
         if sentiment == 1:
             string = "anti billionaire"
@@ -310,6 +323,25 @@ class Sentiment(commands.Cog):
         emojis = ['✅', '❌']
         embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string \"{text_str}\" "
                                                       f"has {string}"
+                                                      f" sentiment")
+        message = await ctx.send(embed=embed)
+        for emoji in emojis:
+            await message.add_reaction(emoji)
+
+    @commands.command(name="analyse_t", alias="tranalyse", help="Performs sentiment analysis")
+    async def analyse_t(self, ctx, *, text):
+        # text_str = ' '.join(text).replace("'", "")
+        text_str = remove_punctuation(text).replace("\n", "")
+        sentiment = predict_sentiment(text_str, 1)
+        # sentiment = 1
+        if sentiment == 1:
+            string = "does not have anti trans"
+        else:
+            string = "has anti trans"
+
+        emojis = ['✅', '❌']
+        embed = embed_func(ctx, "Sentiment analysis", f"Following my analysis it appears your string \"{text_str}\" "
+                                                      f"{string}"
                                                       f" sentiment")
         message = await ctx.send(embed=embed)
         for emoji in emojis:
@@ -344,27 +376,32 @@ class Sentiment(commands.Cog):
         if emoji == '✅':
             # print(str(val[2][5:]))
             if str(val[2][5:]).startswith("anti"):
-                correct_sentiment = 5
+                correct_sentiment = 0
             else:
                 correct_sentiment = 1
         elif emoji == '❌':
             if str(val[2][5:]).startswith("anti"):
                 correct_sentiment = 1
             else:
-                correct_sentiment = 5
+                correct_sentiment = 0
         else:
             return
+
+        if str(val[2]).__contains__("trans"):
+            i = 1
+        else:
+            i = 0
 
         # print(f"text: {text}")
         # print(f"correct sentiment: {correct_sentiment}")
 
-        with open('Billionaire_samples.csv') as f:
+        with open(samples_arr[i]) as f:
             data = f.read()
             if text in data:
                 # print("text already in file")
                 return
 
-        with open('Billionaire_samples.csv', "a") as f:
+        with open(samples_arr[i], "a") as f:
             f.write(f"{correct_sentiment}, {text}\n")
 
     @commands.command(name="retrain", alias="re-train", help="Retrains the "
@@ -377,56 +414,94 @@ class Sentiment(commands.Cog):
             embed2 = embed_func(ctx, "Retrained", "The sentiment analysis "
                                                   "has finished retraining!")
             await ctx.send(embed=embed, delete_after=1)
-            train()
+            train(0, 5)
+            train(1, 50)
             await ctx.send(embed=embed2)
+
+    @commands.command(name="disable-introductions", alias="disable_introductions",
+                      brief="Locks introductions",
+                      help="Disables functionality that lets people "
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def disable_introductions(self, ctx):
+        embed = embed_func(ctx, "Locked down", "Messages sent in introductions will now"
+                                                    " no longer let the user speak in general.")
+        self.invites_disabled = True
+        await ctx.send(embed=embed)
+
+    @commands.command(name="enable-introductions", alias="enable_introductions",
+                      brief="Unlocks introductions",
+                      help="Enables functionality that lets people"
+                           "speak in general after messaging introductions")
+    @pond_check()
+    async def enable_introductions(self, ctx):
+        embed = embed_func(ctx, "Lock down lifted", "Messages sent in introductions will now"
+                                                    " let the user speak in general.")
+        self.invites_disabled = False
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id == 829355854582906930 and message.author.id != 820065836139675668:
-        # if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
+        if (message.channel.id == 830565670805962822 and message.author.id != 820065836139675668
+                and "7" in message.content and "8" in message.content and not self.invites_disabled):
+            # if message.channel.id == 830565670805962822 and message.author.id != 820065836139675668:
             role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
             role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
             role3 = discord.utils.get((await message.guild.fetch_roles()), name='froggers')
 
-            # If a user has any of the 3 roles, ignore their message
-            if not(role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
-                ch = message.guild.get_channel(829349688197120052)
-                # ch = message.guild.get_channel(829358413065486376)
-                # print(message.guild.roles)
-                await message.author.add_roles(role1)
-                # await message.author.add_roles(message.author, role)
-                embed = embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
-                await ch.send(embed=embed)
+            content = message.content
+            # print(content)
+            content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
+            # print(content)
+            # content = content.split("7")
+            content = content[1].split("8")
+            # print(content)
+            content2 = content[1][1:].replace("\n", "")
+            # print(content2)
+            content = content[0][1:].replace("\n", "")
+            # print(content)
+            # print(content)
 
-                # Sends a message mentioning the user and then deletes it after 1 second because
-                # discord embeds don't notify someone if they've been tagged.
-                await ch.send(message.author.mention, delete_after=1)
+            if predict_sentiment(content, 0) != 1 or predict_sentiment(content2, 1) != 1:
+                if predict_sentiment(content, 0) != 1 and predict_sentiment(content2, 1) != 1:
+                    reason = "pro-billionaire and anti-trans"
+                    output = f"{content}\" and \"{content2}"
 
-                if (message.channel.id == 829358413065486376 or message.channel.id == 829355854582906930
-                        and "7" in message.content and "8" in message.content):
-                    content = message.content
-                    # print(content)
-                    content = re.sub("(?<!\d)\d{2}(?!\d)", "", content).split("7")
-                    # print(content)
-                    # content = content.split("7")
-                    content = content[1].split("8")
-                    content = content[0][1:].replace("\n", "")
-                    print(content)
+                elif predict_sentiment(content, 0) != 1:
+                    reason = "pro-billionaire"
+                    output = content
 
-                    if predict_sentiment(content) != 1:
-                        channel = message.guild.get_channel(829358413065486376)
-                        embed = embed_func(message, "Manual review",
-                                                f"{message.author.name}#{message.author.discriminator}'s"
-                                                f" introduction message\n"
-                                                f" \"{message.content}\" \nhas been held for manual "
-                                                f"review due to detected pro billionaire sentiment "
-                                                f"from the line \"{content}\".  \nReact with ✅ to let "
-                                                f"them in, otherwise, they will not be let in.")
-                        await message.add_reaction("🤨")
-                        await channel.send(embed=embed)
-                    else:
-                        print("accepted")
+                elif predict_sentiment(content2, 1) != 1:
+                    reason = "anti-trans"
+                    output = content2
 
+                channel = message.guild.get_channel(829355854582906930)
+                embed = embed_func(message, "Manual review",
+                                   f"{message.author.name}#{message.author.discriminator}'s"
+                                   f" introduction message\n"
+                                   f" \"{message.content}\" \nhas been held for manual "
+                                   f"review due to detected {reason} sentiment "
+                                   f"from the line \"{output}\".  \nReact with ✅ to let "
+                                   f"them in, otherwise, they will not be let in.")
+                await message.add_reaction("🤨")
+                await channel.send(embed=embed)
+            else:
+                # If a user has any of the 3 roles, ignore their message
+                if not (role1 in message.author.roles or role2 in message.author.roles
+                        or role3 in message.author.roles):
+                    ch = message.guild.get_channel(829349688197120052)
+                    # ch = message.guild.get_channel(829358413065486376)
+                    # print(message.guild.roles)
+                    await message.author.add_roles(role1)
+                    # await message.author.add_roles(message.author, role)
+                    embed = embed_func(message, "Welcome!", f"Welcome to the pond {message.author.mention}")
+                    await ch.send(embed=embed)
+
+                    # Sends a message mentioning the user and then deletes it after 1 second because
+                    # discord embeds don't notify someone if they've been tagged.
+                    await ch.send(message.author.mention, delete_after=1)
+
+                # print("accepted")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -435,18 +510,18 @@ class Sentiment(commands.Cog):
 
         message = reaction.message
         embed = message.embeds
-        print(embed)
+        # print(embed)
         val = embed[0].fields[0].value
         title = embed[0].fields[0].name
-        print(val)
-        print(title)
+        # print(val)
+        # print(title)
         if title == "Manual review":
             emoji = reaction.emoji
 
             if emoji == '✅':
                 user = ((val.split("\n"))[0].split(" ")[0])[:-2]
-                print(1)
-                print(user)
+                # print(1)
+                # print(user)
                 member = message.guild.get_member_named(user)
                 role1 = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
                 # role2 = discord.utils.get((await message.guild.fetch_roles()), name='froglet')
@@ -454,7 +529,7 @@ class Sentiment(commands.Cog):
 
                 # If a user has any of the 3 roles, ignore their message
                 # if not (
-                #         role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
+                # role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
                 # ch = message.guild.get_channel(829349688197120052)
                 ch = message.guild.get_channel(829358413065486376)
                 # print(message.guild.roles)
@@ -467,7 +542,7 @@ class Sentiment(commands.Cog):
                 # discord embeds don't notify someone if they've been tagged.
                 await ch.send(member.mention, delete_after=1)
             else:
-                print(2)
+                # print(2)
                 return
 
         # print(f"text: {text}")

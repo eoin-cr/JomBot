@@ -25,10 +25,7 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Added automatic cutoff to the training when over-training is being detected.
-Also added function to scan introduction messages, and automatically
-flag ones with disliked sentiments, and then send them to a specific channel
-for manual authorisation.
+Fully created introductions channel linking with the model.
 
 ---
 
@@ -58,6 +55,12 @@ Then for the sentiment analyser normalisation function you'll need to run
 python -m spacy download en_core_web_sm
 ```
 
+And then install ffmpeg on whatever version of linux you're using. For Ubuntu
+the command is
+```python
+sudo apt install ffmpeg
+```
+
 Then to run the bot you'll want to simply run `python3 bot.py` and it should be
 working. Note that the bot will only be running for as long as your terminal is
 open, so I'd recommend using tmux to create terminal instances so it will be
@@ -81,6 +84,17 @@ option is far more annoying than just doing it through the terminal. I'd
 recommend just getting the JSON key and then placing 
 `export GOOGLE_APPLICATION_CREDENTIALS="[/place/in/system/key.json]` in your
 bash/zshrc. Then the program should work fine.
+
+---
+
+# NOTE:
+
+The contents in the sample sets are NOT my own opinions.  These sample sets
+have been scraped from various places, and may contain content that some users
+find offensive. A sample set will be created to try and automatically prevent
+transphobia on a server, so that sample set will contain transphobic things,
+which are absolutely not my own opinions, and I strongly condemn transphobia
+of any sort.
 
 ---
 

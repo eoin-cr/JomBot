@@ -17,7 +17,6 @@ def pond_check():
 class Pond(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.invites_disabled = False
         print("Pond initialised")
 
     @commands.command(name="hi")
@@ -217,29 +216,6 @@ So if your messages are getting removed, that might be why""")
             response = "Uh oh there's been a fucky wucky"
             await message.channel.send(response)
             return
-
-    @commands.command(name="disable-introductions", alias="disable_introductions",
-                      brief="Locks introductions",
-                      help="Disables functionality that lets people "
-                           "speak in general after messaging introductions")
-    @pond_check()
-    async def disable_introductions(self, ctx):
-        embed = main.embed_func(ctx, "Locked down", "Messages sent in introductions will now"
-                                                    " no longer let the user speak in general.")
-        self.invites_disabled = True
-        await ctx.send(embed=embed)
-
-    @commands.command(name="enable-introductions", alias="enable_introductions",
-                      brief="Unlocks introductions",
-                      help="Enables functionality that lets people"
-                           "speak in general after messaging introductions")
-    @pond_check()
-    async def enable_introductions(self, ctx):
-        embed = main.embed_func(ctx, "Lock down lifted", "Messages sent in introductions will now"
-                                                         " let the user speak in general.")
-        self.invites_disabled = False
-        await ctx.send(embed=embed)
-
 
 def setup(bot):
     bot.add_cog(Pond(bot))
