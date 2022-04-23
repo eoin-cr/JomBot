@@ -7,8 +7,6 @@ import json
 import os
 
 
-# TODO: use better file stuff than just a txt file - json file perhaps
-
 class Time(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,12 +16,17 @@ class Time(commands.Cog):
     async def time(self, ctx, area):
         now = datetime.now()
         area = area.lower()
+
+        # set the offset to 0 - your timezone.  E.g. this bot will be hosted on
+        # a server where daylight savings is currently in effect, so to get the
+        # actual value of UTC+0, we must remove the value of the offset
+        offset = -1
         # This timezone (and the canadian one) was based off of a specific user in
         # the server, so I've added the server check to reduce confusion in other
         # servers
         if area == "us" or area == "america":
             if ctx.guild.id == 829349685667430460:
-                hour = int(now.strftime("%H")) - 8
+                hour = int(now.strftime("%H")) - 8 + offset
                 if hour < 0:
                     hour += 24
                 time = "" + str(hour) + ":" + str(now.strftime("%M:%S"))
@@ -34,7 +37,7 @@ class Time(commands.Cog):
             await ctx.send(time)
 
         elif area == "serbia":
-            hour = int(now.strftime("%H")) + 1
+            hour = int(now.strftime("%H")) + 1 + offset
             if hour >= 24:
                 hour -= 24
             time = "" + str(hour) + str(now.strftime(":%M:%S"))
@@ -42,7 +45,7 @@ class Time(commands.Cog):
 
         elif area == "canada":
             if ctx.guild.id == 829349685667430460:
-                hour = int(now.strftime("%H")) - 5
+                hour = int(now.strftime("%H")) - 5 + offset
                 if hour < 0:
                     hour += 24
                 time = "" + str(hour) + str(now.strftime(":%M:%S"))
@@ -72,7 +75,7 @@ class Time(commands.Cog):
             # Else statement isn't necessary due to the return in the if but it's more obvious
             # what the code means when quickly glancing at the code
             else:
-                hour = int(now.strftime("%H")) + int(data.get(f'{area}'))
+                hour = int(now.strftime("%H")) + int(data.get(f'{area}')) + offset
 
                 # Makes sure the displayed hour is between 0 and 24
                 if hour >= 24:
