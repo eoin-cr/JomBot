@@ -534,8 +534,8 @@ class Sentiment(commands.Cog):
                 # If a user has any of the 3 roles, ignore their message
                 # if not (
                 # role1 in message.author.roles or role2 in message.author.roles or role3 in message.author.roles):
-                # ch = message.guild.get_channel(829349688197120052)
-                ch = message.guild.get_channel(829358413065486376)
+                ch = message.guild.get_channel(829349688197120052)
+#                 ch = message.guild.get_channel(829358413065486376)
                 # print(message.guild.roles)
                 await member.add_roles(role1)
                 # await message.author.add_roles(message.author, role)
