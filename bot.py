@@ -87,21 +87,24 @@ def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
 # the bot is online
 
 # Loads certain cogs stored in the cogs directory
-bot.load_extension("cogs.crypto")
-bot.load_extension("cogs.pond")
+# old
 # bot.load_extension("cogs.remove")
 # bot.load_extension("cogs.join")
 # bot.load_extension("cogs.binder_check")
 # bot.load_extension("cogs.jokes")
+# bot.load_extension("cogs.embed_test")
+# bot.load_extension("cogs.test")
+
+# curr
+# bot.load_extension("cogs.error")
+bot.load_extension("cogs.crypto")
+bot.load_extension("cogs.pond")
 bot.load_extension("cogs.ip")
-# bot.load_extension("cogs.song")
+bot.load_extension("cogs.song")
 bot.load_extension("cogs.wordle")
 bot.load_extension("cogs.time")
-# bot.load_extension("cogs.error")
-# bot.load_extension("cogs.embed_test")
 bot.load_extension("cogs.netsoc")
 bot.load_extension("cogs.hh")
-# bot.load_extension("cogs.test")
 bot.load_extension("cogs.translate")
 bot.load_extension("cogs.control")
 bot.load_extension("cogs.images")
