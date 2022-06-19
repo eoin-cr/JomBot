@@ -45,7 +45,7 @@ class Pond(commands.Cog):
                 await message.author.add_roles(muted)
                 await message.author.remove_roles(tadpole)
                 print("muted")
-                await asyncio.sleep(30)
+                await asyncio.sleep(3600)
                 await message.author.remove_roles(muted)
                 await message.author.add_roles(tadpole)
                 print("unmuted")
