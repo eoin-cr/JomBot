@@ -1,6 +1,8 @@
 **/__pycache__/**
 .env
+.old_env
 ethereal*
 servers
 users
 venv
+/photo_dataset/

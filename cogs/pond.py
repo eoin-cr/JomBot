@@ -5,6 +5,7 @@ from discord.ext import commands
 import random
 import asyncio
 import bot as main
+from datetime import timedelta
 
 
 def pond_check():
@@ -58,7 +59,6 @@ class Pond(commands.Cog):
             #         # discord embeds don't notify someone if they've been tagged.
             #         await ch.send(message.author.mention, delete_after=1)
 
-
             if message.mention_everyone:
                 return await message.channel.send("This seems important <:flosh:701774266894647338>")
 
@@ -83,29 +83,29 @@ class Pond(commands.Cog):
                 await memb.kick(reason="You were inactive and have been footed")
                 return await message.channel.send("Goodbye goofball <:pixellice:829423250361679922>")
 
-    @commands.command(name="Q", help="Formats Jom's questions", hidden=True)
-    async def Q(self, ctx, *, cont):
-        # Checks if I sent the message and if it's in the right server
-        if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and \
-                ctx.message.guild.id == 829349685667430460:
-            # Splits message at newlines
-            split = cont.split('\n')
-
-            # Formatting stuff
-            for i in range(len(split)):
-                if split[i].startswith("Q"):
-                    split[i] = split[i].replace(".", ":", 1)
-                elif '/' not in split[i]:
-                    split[i] = f"- {split[i]}"
-
-            # Sets question channel
-            qs_channel = message.guild.get_channel(834198286310047784)
-            #             qs_channel = ctx.message.guild.get_channel(829358413065486376)
-
-            # Undoes the earlier newline split and sends message
-            joined = '\n'.join(split)
-            full_message = str(f"```yaml\n{joined} \n```")
-            return await qs_channel.send(full_message)
+    # @commands.command(name="Q", help="Formats Jom's questions", hidden=True)
+    # async def Q(self, ctx, *, cont):
+    #     # Checks if I sent the message and if it's in the right server
+    #     if ctx.message.author.id == 484444017489084416 and ctx.message.guild is not None and \
+    #             ctx.message.guild.id == 829349685667430460:
+    #         # Splits message at newlines
+    #         split = cont.split('\n')
+    #
+    #         # Formatting stuff
+    #         for i in range(len(split)):
+    #             if split[i].startswith("Q"):
+    #                 split[i] = split[i].replace(".", ":", 1)
+    #             elif '/' not in split[i]:
+    #                 split[i] = f"- {split[i]}"
+    #
+    #         # Sets question channel
+    #         qs_channel = message.guild.get_channel(834198286310047784)
+    #         #             qs_channel = ctx.message.guild.get_channel(829358413065486376)
+    #
+    #         # Undoes the earlier newline split and sends message
+    #         joined = '\n'.join(split)
+    #         full_message = str(f"```yaml\n{joined} \n```")
+    #         return await qs_channel.send(full_message)
 
     @commands.command(name="jomwheel", help="Spins the jomwheel")
     @pond_check()
@@ -216,6 +216,24 @@ So if your messages are getting removed, that might be why""")
             response = "Uh oh there's been a fucky wucky"
             await message.channel.send(response)
             return
+
+    @commands.command(name="terces", hidden=True)
+    @pond_check()
+    async def terces(self, ctx):
+        print("muting")
+        member_obj = ctx.guild.get_member(ctx.message.author.id)
+        await member_obj.send("You have been timed out for an hour.  Mind your own goddamn business."
+                              "\nThis is an automated message, do not reply.")
+        muted = discord.utils.get((await ctx.guild.fetch_roles()), name='Muted')
+        tadpole = discord.utils.get((await ctx.guild.fetch_roles()), name='tadpoles')
+        await ctx.message.author.add_roles(muted)
+        await ctx.message.author.remove_roles(tadpole)
+        print("muted")
+        await asyncio.sleep(3600)
+        await ctx.message.author.remove_roles(muted)
+        await ctx.message.author.add_roles(tadpole)
+        print("unmuted")
+
 
 def setup(bot):
     bot.add_cog(Pond(bot))

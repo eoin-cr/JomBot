@@ -13,7 +13,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GOOGLE_KEY = os.getenv('GOOGLE_API')
 GOOGLE_ID = os.getenv('GOOGLE_ID')
 
-default_prefixes = ["!", '<:chigmn2:829382748631203901> ', "<@820065836139675668> "]
+default_prefixes = ["!", '<:chigmn2:829382748631203901> ', "<@967441591616823357> "]
 
 
 # just a function to allow per-server prefixes
@@ -86,7 +86,13 @@ def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
 # Just a quick command to see how they work.  Also a good checker to see if
 # the bot is online
 
-# Loads certain cogs stored in the cogs directory
+@bot.command()
+async def hello(ctx):
+    hi = "Hello!"
+    await ctx.send(hi)
+
+
+# loads certain cogs stored in the cogs directory
 # old
 # bot.load_extension("cogs.remove")
 # bot.load_extension("cogs.join")
@@ -97,18 +103,18 @@ def embed_func(ctx, title=None, text=None, colour=discord.Color.blue()):
 
 # curr
 # bot.load_extension("cogs.error")
-bot.load_extension("cogs.crypto")
+# bot.load_extension("cogs.crypto")
 bot.load_extension("cogs.pond")
-bot.load_extension("cogs.ip")
-bot.load_extension("cogs.song")
-bot.load_extension("cogs.wordle")
-bot.load_extension("cogs.time")
-bot.load_extension("cogs.netsoc")
-bot.load_extension("cogs.hh")
-bot.load_extension("cogs.translate")
-bot.load_extension("cogs.control")
-bot.load_extension("cogs.images")
-bot.load_extension("cogs.sentiment")
+# bot.load_extension("cogs.ip")
+# bot.load_extension("cogs.song")
+# bot.load_extension("cogs.wordle")
+# bot.load_extension("cogs.time")
+# bot.load_extension("cogs.netsoc")
+# bot.load_extension("cogs.hh")
+# # bot.load_extension("cogs.translate")
+# bot.load_extension("cogs.control")
+# bot.load_extension("cogs.images")
+# bot.load_extension("cogs.sentiment")
+# bot.load_extension("cogs.amongus")
 
-# Runs the bot using a .env stored bot token
 bot.run(TOKEN)
