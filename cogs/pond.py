@@ -34,6 +34,21 @@ class Pond(commands.Cog):
     @pond_check()  # Doesn't seem to work?
     async def on_message(self, message):
         if message.guild is not None and message.guild.id == 829349685667430460:
+            # if message.content.contains("terces"):
+            if "terces" in message.content:
+                print("muting")
+                member_obj = message.guild.get_member(message.author.id)
+                await member_obj.send("You have been timed out for an hour.  Mind your own goddamn business."
+                                      "\nThis is an automated message, do not reply.")
+                muted = discord.utils.get((await message.guild.fetch_roles()), name='Muted')
+                tadpole = discord.utils.get((await message.guild.fetch_roles()), name='tadpoles')
+                await message.author.add_roles(muted)
+                await message.author.remove_roles(tadpole)
+                print("muted")
+                await asyncio.sleep(30)
+                await message.author.remove_roles(muted)
+                await message.author.add_roles(tadpole)
+                print("unmuted")
             # Checks if a message was sent in the introductions channel
             # if message.channel.id == 829358413065486376:
             # if message.channel.id == 830565670805962822 and not self.invites_disabled:
@@ -217,22 +232,22 @@ So if your messages are getting removed, that might be why""")
             await message.channel.send(response)
             return
 
-    @commands.command(name="terces", hidden=True)
-    @pond_check()
-    async def terces(self, ctx):
-        print("muting")
-        member_obj = ctx.guild.get_member(ctx.message.author.id)
-        await member_obj.send("You have been timed out for an hour.  Mind your own goddamn business."
-                              "\nThis is an automated message, do not reply.")
-        muted = discord.utils.get((await ctx.guild.fetch_roles()), name='Muted')
-        tadpole = discord.utils.get((await ctx.guild.fetch_roles()), name='tadpoles')
-        await ctx.message.author.add_roles(muted)
-        await ctx.message.author.remove_roles(tadpole)
-        print("muted")
-        await asyncio.sleep(3600)
-        await ctx.message.author.remove_roles(muted)
-        await ctx.message.author.add_roles(tadpole)
-        print("unmuted")
+    # @commands.command(name="terces", hidden=True)
+    # @pond_check()
+    # async def terces(self, ctx):
+    #     print("muting")
+    #     member_obj = ctx.guild.get_member(ctx.message.author.id)
+    #     await member_obj.send("You have been timed out for an hour.  Mind your own goddamn business."
+    #                           "\nThis is an automated message, do not reply.")
+    #     muted = discord.utils.get((await ctx.guild.fetch_roles()), name='Muted')
+    #     tadpole = discord.utils.get((await ctx.guild.fetch_roles()), name='tadpoles')
+    #     await ctx.message.author.add_roles(muted)
+    #     await ctx.message.author.remove_roles(tadpole)
+    #     print("muted")
+    #     await asyncio.sleep(3600)
+    #     await ctx.message.author.remove_roles(muted)
+    #     await ctx.message.author.add_roles(tadpole)
+    #     print("unmuted")
 
 
 def setup(bot):
