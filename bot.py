@@ -104,7 +104,7 @@ async def hello(ctx):
 # curr
 # bot.load_extension("cogs.error")
 # bot.load_extension("cogs.crypto")
-bot.load_extension("cogs.pond")
+# bot.load_extension("cogs.pond")
 # bot.load_extension("cogs.ip")
 # bot.load_extension("cogs.song")
 # bot.load_extension("cogs.wordle")
@@ -115,6 +115,6 @@ bot.load_extension("cogs.pond")
 # bot.load_extension("cogs.control")
 # bot.load_extension("cogs.images")
 # bot.load_extension("cogs.sentiment")
-# bot.load_extension("cogs.amongus")
+bot.load_extension("cogs.alex")
 
 bot.run(TOKEN)

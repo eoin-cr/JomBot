@@ -25,8 +25,12 @@ Default prefix: `!`
 
 # Added in this commit:
 
-Fixed issue where emojis in the message would interfere with the results.
-Emojis now get automatically stripped from the message before analysing.
+Added machine learning algorithm to determine the difference between one type
+of image and all other images (sorry alex).  Made a python file for training
+the model, and then a separate one to be used in the bot.  This means the
+model does not have to be re-trained every single time the bot starts, which
+is very time consuming, for very little benefit.  I plan to save all the other
+models in a similar fashion in the future.
 
 ---
 
