@@ -114,7 +114,7 @@ async def hello(ctx):
 # # bot.load_extension("cogs.translate")
 # bot.load_extension("cogs.control")
 # bot.load_extension("cogs.images")
-# bot.load_extension("cogs.sentiment")
+bot.load_extension("cogs.sentiment")
 bot.load_extension("cogs.alex")
 
 bot.run(TOKEN)
