@@ -164,10 +164,10 @@ class HH(commands.Cog):
 
                 # if they have sent over 125 messages in the last week, and do not already
                 # have the regular role, give it to them
-                if messages > main["settings"]["regular_amount"] and regular not in ctx.author.roles:
+                if int(messages) > int(main["settings"]["regular_amount"]) and regular not in ctx.author.roles:
                     await ctx.author.add_roles(regular)
 
-                elif messages < main["settings"]["regular_amount"] and regular in ctx.author.roles:
+                elif int(messages) < int(main["settings"]["regular_amount"]) and regular in ctx.author.roles:
                     await ctx.author.remove_roles(regular)
 
                 # write the json data to the file
