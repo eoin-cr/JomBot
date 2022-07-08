@@ -14,7 +14,7 @@ class WOTD(commands.Cog):
 
     # Creates a task loop that runs every 60 seconds to check if the IP
     # has changed
-    @tasks.loop(seconds=24)
+    @tasks.loop(hours=24)
     async def send_wotd(self, message):
         merriam_request = requests.post("https://www.merriam-webster.com/word-of-the-day").text
         idx_start = merriam_request.find("<h1>")
@@ -30,7 +30,7 @@ class WOTD(commands.Cog):
 
     # Command to display IP
     @commands.command(name='word_of_the_day_start', aliases=['wotd_start', 'start_wotd', 'wotd-start',
-                                                             'start-wotd'])
+                                                             'start-wotd'], hidden=True)
     async def start_word_of_the_day(self, message):
         await message.channel.send("Word of the day has started!")
 
@@ -40,7 +40,7 @@ class WOTD(commands.Cog):
             self.send_wotd.start(message)
 
     @commands.command(name='word_of_the_day_stop', aliases=['wotd_stop', 'stop_wotd', 'wotd-stop',
-                                                                'stop-wotd'])
+                                                                'stop-wotd'], hidden=True)
     async def stop_word_of_the_day(self, message):
         if self.send_wotd.is_running():
             self.send_wotd.cancel()
