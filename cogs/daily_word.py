@@ -20,10 +20,21 @@ class WOTD(commands.Cog):
         idx_start = merriam_request.find("<h1>")
         idx_end = merriam_request.find("</h1>")
         word = merriam_request[idx_start + 4:idx_end]
-        def_start = merriam_request.find(f"<em>{word.capitalize()}</em>")
+        # print(f"word: {word}")
+
+        # idx_info = merriam_request.find("<span class=\"main-attr\">")
+        # idx_info_end = merriam_request.find("</span>")
+        if "<span class=\"main-attr\">verb</span>" in merriam_request:
+            word_type = "verb"
+
+        if word_type == "verb":
+            def_start = merriam_request.find(f"<em>{word}</em>")
+        else:
+            def_start = merriam_request.find(f"<em>{word.capitalize()}</em>")
         # print(merriam_request[def_start:])
         def_end = merriam_request.find("</p>", def_start)
         definition = merriam_request[def_start + 10 + len(word):def_end]
+        # print(f"definition: {definition}")
 
         await message.channel.send(f'Hello everyone!\nToday\'s word of the day is: {word}.\n{word.capitalize()}'
                                    f' {definition}')
