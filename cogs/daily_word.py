@@ -14,7 +14,7 @@ class WOTD(commands.Cog):
 
     # Creates a task loop that runs every 60 seconds to check if the IP
     # has changed
-    @tasks.loop(seconds=100)
+    @tasks.loop(hours=24)
     async def send_wotd(self, message):
         merriam_request = requests.post("https://www.merriam-webster.com/word-of-the-day").text
         idx_start = merriam_request.find("<h1>")
