@@ -17,3 +17,4 @@ tqdm~=4.64.0
 discord.py[voice]
 aiohttp~=3.7.4.post0
 keras~=2.8.0
+gpt_2_simple~=0.1.0
