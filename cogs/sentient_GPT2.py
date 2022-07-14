@@ -1,7 +1,6 @@
 import gpt_2_simple as gpt2
-# import discord
 from discord.ext import commands
-# import tensorflow as tf
+import re
 
 
 class Sentient(commands.Cog):
@@ -12,27 +11,21 @@ class Sentient(commands.Cog):
 
     @commands.command(name="complete", help="Generates text from the GPT-2 model")
     async def complete(self, ctx, *, text):
-        # tf.reset_default_graph()
-
         if not self.sess:
             self.sess = gpt2.start_tf_sess()
         else:
             self.sess = gpt2.reset_session(self.sess)
 
         gpt2.load_gpt2(self.sess)
-
-        text = gpt2.generate(self.sess, prefix=text, return_as_list=True)
-        text_to_send = ""
-        print(text)
-        i = 0
-        text = text[0].split("\n")
-        while i < len(text) and i < 20:
-            # for i in range(20):
-            text_to_send += text[i] + "\n"
-            i += 1
-
-        print(text_to_send[:1999])
-        await ctx.send(text_to_send[:1999])
+        async with ctx.typing():
+            # blocking async is bad but i simply do not care
+            text = gpt2.generate(self.sess, prefix=text, return_as_list=True)
+            print(text)
+        # Remove emoji-only lines
+        text = [l for l in text[0].split("\n") if not re.match(r"^:.*:$", l)][:20]
+        # Remove backticks
+        text = "\n".join(text).replace("`", "")[:1990]
+        await ctx.send("```\n" + text + "```")
 
 
 def setup(bot):
