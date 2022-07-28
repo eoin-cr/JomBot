@@ -1,6 +1,7 @@
 # IP.py
 from discord.ext import commands, tasks
-import subprocess
+# import subprocess
+import requests
 
 
 class IP(commands.Cog):
@@ -14,12 +15,7 @@ class IP(commands.Cog):
     @tasks.loop(seconds=60)
     async def check_ip(self, message):
         # Gets the IP
-        result = subprocess.run(['curl', 'ifconfig.co'], stdout=subprocess.PIPE)
-        ip_address = str(result).split(' ')
-
-        # Strips other information
-        ip_address = ip_address[3]
-        ip_address = ip_address[9:-4]
+        ip_address = requests.get('https://api.ipify.org').content.decode('utf8')
 
         # Checks if IP has changed, and if so sends a message and updates
         # the old IP value
@@ -33,12 +29,7 @@ class IP(commands.Cog):
         # Checks if it was requested in my own server
         if message.guild.id == 786732353098743930:
             # Gets the IP
-            result = subprocess.run(['curl', 'ifconfig.co'], stdout=subprocess.PIPE)
-            ip_address = str(result).split(' ')
-
-            # Strips other stuff
-            ip_address = ip_address[3]
-            ip_address = ip_address[9:-4]
+            ip_address = requests.get('https://api.ipify.org').content.decode('utf8')
 
             # Only tries start the loop if it's not already running to prevent
             # issues
