@@ -16,10 +16,12 @@ class WOTD(commands.Cog):
     # has changed
     @tasks.loop(hours=24)
     async def send_wotd(self, message):
-        merriam_request = requests.post("https://www.merriam-webster.com/word-of-the-day").text
+        merriam_request = requests.get("https://www.merriam-webster.com/word-of-the-day").text
+        # print(f'req: {merriam_request}')
         idx_start = merriam_request.find("<h1>")
         idx_end = merriam_request.find("</h1>")
         word = merriam_request[idx_start + 4:idx_end]
+        # print(word)
         word_type = None
 
         if "<span class=\"main-attr\">verb</span>" in merriam_request:
