@@ -28,5 +28,5 @@ class Sentient(commands.Cog):
         await ctx.send("```\n" + text + "```")
 
 
-def setup(bot):
-    bot.add_cog(Sentient(bot))
+async def setup(bot):
+    await bot.add_cog(Sentient(bot))

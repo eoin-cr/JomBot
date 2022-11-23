@@ -15,6 +15,9 @@ GOOGLE_ID = os.getenv('GOOGLE_ID')
 
 default_prefixes = ["!", '<:chigmn2:829382748631203901> ', "<@967441591616823357> "]
 
+async def main():
+    await load_extensions()
+    await bot.start(TOKEN)
 
 # just a function to allow per-server prefixes
 async def determine_prefix(bot, message):
@@ -91,31 +94,33 @@ async def hello(ctx):
     hi = "Hello!"
     await ctx.send(hi)
 
+async def load_extensions():
+    # loads certain cogs stored in the cogs directory
+    # old
+    # bot.load_extension("cogs.remove")
+    # bot.load_extension("cogs.join")
+    # bot.load_extension("cogs.binder_check")
+    # bot.load_extension("cogs.jokes")
+    # bot.load_extension("cogs.embed_test")
+    # bot.load_extension("cogs.test")
 
-# loads certain cogs stored in the cogs directory
-# old
-# bot.load_extension("cogs.remove")
-# bot.load_extension("cogs.join")
-# bot.load_extension("cogs.binder_check")
-# bot.load_extension("cogs.jokes")
-# bot.load_extension("cogs.embed_test")
-# bot.load_extension("cogs.test")
-
-# curr
-bot.load_extension("cogs.error")
-bot.load_extension("cogs.crypto")
-bot.load_extension("cogs.pond")
-bot.load_extension("cogs.ip")
-bot.load_extension("cogs.song")
-bot.load_extension("cogs.wordle")
-bot.load_extension("cogs.time")
-bot.load_extension("cogs.netsoc")
-bot.load_extension("cogs.hh")
-bot.load_extension("cogs.translate")
-bot.load_extension("cogs.control")
-bot.load_extension("cogs.images")
-bot.load_extension("cogs.sentiment")
-bot.load_extension("cogs.alex")
-bot.load_extension("cogs.daily_word")
+    # curr
+    # bot.load_extension("cogs.error")
+    # bot.load_extension("cogs.crypto")
+    # bot.load_extension("cogs.pond")
+    # bot.load_extension("cogs.ip")
+    # bot.load_extension("cogs.song")
+    # bot.load_extension("cogs.wordle")
+    # bot.load_extension("cogs.time")
+    # bot.load_extension("cogs.netsoc")
+    # bot.load_extension("cogs.hh")
+    # bot.load_extension("cogs.translate")
+    # bot.load_extension("cogs.control")
+    # bot.load_extension("cogs.images")
+    # bot.load_extension("cogs.sentiment")
+    # bot.load_extension("cogs.alex")
+    # bot.load_extension("cogs.daily_word")
+    await bot.load_extension("cogs.sentient_GPT2")
 
 bot.run(TOKEN)
+#asyncio.run(main())
